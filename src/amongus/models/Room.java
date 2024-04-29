@@ -1,5 +1,4 @@
 
-
 package amongus.models;
 
 import java.util.ArrayList;
@@ -10,11 +9,12 @@ import java.util.List;
 public class Room 
 {
     private final String name;
-    private List<Room> neighbors = new ArrayList<>(5);  //[O,N,E,S,T]
-    
     private final RoomType type;
     private final Sabotage sabotage;
-    private final RoomState state;
+    
+    private List<Room> neighbors = new ArrayList<>(5);  //[O,N,E,S,T]
+    
+    private RoomState state;
 
     public Room(String name, RoomType type, Sabotage sabotage) 
     {
@@ -22,6 +22,11 @@ public class Room
         this.type = type;
         this.sabotage = sabotage;
     }
+
+    public void setState(RoomState state) {
+        this.state = state;
+    }
+    
     
     public Room neighborAt(Cardinal cardinal)
     {
@@ -49,7 +54,8 @@ public class Room
         else System.out.printf("El vecino %s ya existe en %s",room.getName(), this.getName());
     }
     
-       
+    //-- Enumerables --   
+    
     public enum RoomType
     {
         SECCION, PASILLO, TUBERIA
@@ -70,19 +76,6 @@ public class Room
         return Cardinal.values()[index];
     }
     
-    private class RoomState
-    {
-        private List<CrewMember> currentMembers;
-        private Boolean agentPresent;
-        private List<Sabotage> usedSabotages;
-
-        public RoomState(List<CrewMember> currentMembers, Boolean agentPresent) {
-            this.currentMembers = currentMembers;
-            this.agentPresent = agentPresent;
-            this.usedSabotages = new ArrayList<>();
-        }
-        
-    }
     
     public String getName() {
         return name;
@@ -99,5 +92,13 @@ public class Room
     public Sabotage getSabotage() {
         return sabotage;
     }
+
+    public RoomState getState() {
+        return state;
+    }
+    
+    
+    
+    
     
 }
