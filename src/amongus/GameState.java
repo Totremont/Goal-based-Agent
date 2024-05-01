@@ -17,6 +17,7 @@ import java.util.function.BiFunction;
 public class GameState extends EnvironmentState 
 {
     private final Game environment;
+    
     private final HashMap<String,Room> map;
     private final List<CrewMember> crews = new ArrayList<>();
     
@@ -28,6 +29,10 @@ public class GameState extends EnvironmentState
     private boolean agentExtraSensor;
     
     private long gameTime;
+    
+    //Se activa cuando el juego debe darle información extrasensorial al agente (en la sgte percepción)
+    //Sucede si el agente acciona su sensor
+    private boolean omniscientAgent;
 
     public GameState(Game environment) 
     {
@@ -65,6 +70,7 @@ public class GameState extends EnvironmentState
         String agentRoomName = roomNames.get(agentInitialIndex);
         RoomState agentRoomState = map.get(agentRoomName).getState();
         agentRoomState.setAgentPresent(true);
+        
         this.agentEnergy = agentEnergy;
         this.agentExtraSensor = agentExtraSensor;
         
@@ -88,9 +94,22 @@ public class GameState extends EnvironmentState
     
     //-- Setters para modificar el estado del juego
     
-    //En cuál habitación está el agente?
-    public void setAgentRoom(Room agentRoom) {
+    //Cambiar habitación del agente
+    public void setAgentRoom(Room agentRoom) 
+    {
+        RoomState currentRoomState = getAgentRoom().getState();
+        currentRoomState.setAgentPresent(false);
+        
+        RoomState newRoomState = agentRoom.getState();
+        newRoomState.setAgentPresent(true);
+        
         this.agentRoom = agentRoom;
+    }
+    
+    public void setAgentRoom(String agentRoom) 
+    {
+        Room room = this.map.get(agentRoom);
+        this.setAgentRoom(room);
     }
 
     public void setAgentEnergy(Long agentEnergy) {
@@ -101,6 +120,13 @@ public class GameState extends EnvironmentState
         this.agentExtraSensor = agentExtraSensor;
     }
     
+    public void addCrewKilled(String name)
+    {
+        CrewMember crew = this.crews.stream().filter(it -> it.getName() == name).findFirst().get();
+        crew.getState().setIsAlive(false);
+    }
+    
+    // -- Getters
     public HashMap<String, Room> getMap() {
         return map;
     }
@@ -121,7 +147,12 @@ public class GameState extends EnvironmentState
         return crewStates;
     }
 
-    public Room getAgentRoom() {
+    public Room getAgentRoom() 
+    {
+        if(agentRoom == null)
+        {
+            agentRoom = roomStates.stream().filter(it -> it.getAgentPresent()).findFirst().get().getRoom();
+        }
         return agentRoom;
     }
 
@@ -135,18 +166,23 @@ public class GameState extends EnvironmentState
 
     public long getGameTime() {
         return gameTime;
-    }
-    
-    
-    
-    
-    
+    } 
     
     @Override
     public String toString() 
     {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+
+    public boolean isOmniscientAgent() {
+        return omniscientAgent;
+    }
+
+    public void setOmniscientAgent(boolean omniscientAgent) {
+        this.omniscientAgent = omniscientAgent;
+    }
+    
+    
     
 
 }
