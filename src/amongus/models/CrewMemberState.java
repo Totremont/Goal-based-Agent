@@ -20,9 +20,21 @@ public class CrewMemberState {
         return isAlive;
     }
 
-    public void setIsAlive(Boolean isAlive) {
+    public void setIsAlive(Boolean isAlive) 
+    {
         this.isAlive = isAlive;
+        
+        //Si no estoy vivo quitarme de la habitación (Pero guardar última habitación en este estado)
+        if(!this.isAlive) currentRoom.getState().deleteMember(this.crew);
     }
+
+    public CrewMember getCrew() {
+        return crew;
+    }
+    
+    
+    
+    
     
     
 

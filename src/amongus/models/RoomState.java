@@ -26,6 +26,11 @@ public class RoomState
     {
         this.currentMembers.add(crew);
     }
+    
+    public void deleteMember(CrewMember crew)
+    {
+        this.currentMembers.remove(crew);
+    }
 
     public void setAgentPresent(Boolean agentPresent) {
         this.agentPresent = agentPresent;

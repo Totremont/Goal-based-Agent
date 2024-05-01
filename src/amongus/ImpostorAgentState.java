@@ -30,6 +30,8 @@ public class ImpostorAgentState extends SearchBasedAgentState
     
     private Long energy;
     
+    private boolean sensorAvailable;
+    
     //Estado de una habitación según observa el agente. Es un subconjunto del estado real RoomState en la clase Room
     public class RoomState
     {
@@ -40,7 +42,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
         private Long lastSeen;
         
         //Tripulantes encontrados
-        private final List<String> crewPresent = new ArrayList<>();
+        private List<String> crewPresent = new ArrayList<>();
 
         public RoomState(String name, List<String> neighbors, long lastSeen, List<String> crewPresent) 
         {
@@ -64,6 +66,11 @@ public class ImpostorAgentState extends SearchBasedAgentState
 
         public List<String> getCrewPresent() {
             return crewPresent;
+        }
+        
+        public void deleteCrew(String name)
+        {
+            this.crewPresent = this.crewPresent.stream().filter(it -> it != name).toList();
         }
           
     }
@@ -94,6 +101,8 @@ public class ImpostorAgentState extends SearchBasedAgentState
         this.gameTime = agentPerc.getGameTime();
         
         this.energy = agentPerc.getEnergySensor();
+        
+        this.sensorAvailable = agentPerc.isExtraSensorAvailable();
     }
     
     @Override
@@ -145,7 +154,9 @@ public class ImpostorAgentState extends SearchBasedAgentState
         return energy;
     }
 
-    public void setCurrentRoom(RoomState currentRoom) {
+    public void setCurrentRoom(RoomState currentRoom) 
+    {
+        this.previousRoom = this.currentRoom;
         this.currentRoom = currentRoom;
     }
 
@@ -160,10 +171,21 @@ public class ImpostorAgentState extends SearchBasedAgentState
     public RoomState getPreviousRoom() {
         return previousRoom;
     }
-
-    public void setPreviousRoom(RoomState previousRoom) {
-        this.previousRoom = previousRoom;
+    
+    public void addCrewKilled(String name)
+    {
+        this.crewKilled.add(name);
     }
+
+    public boolean isSensorAvailable() {
+        return sensorAvailable;
+    }
+
+    public void setSensorAvailable(boolean sensorAvailable) {
+        this.sensorAvailable = sensorAvailable;
+    }
+    
+    
     
     
     

@@ -16,6 +16,7 @@ public class ImpostorAgentPerc extends Perception
     private Long energySensor;
     private boolean sabotable;
     private Long gameTime;
+    private boolean extraSensorAvailable;
     
     
 
@@ -28,7 +29,7 @@ public class ImpostorAgentPerc extends Perception
 
     public ImpostorAgentPerc(
             String currentRoom,String previousRoom, Long energy, List<String> neighbors, 
-            List<String> crewPresent, boolean sabotable, Long gameTime) 
+            List<String> crewPresent, boolean sabotable, Long gameTime, boolean extraSensorAvailable) 
     {
         this.currentRoomSensor = currentRoom;
         this.energySensor = energy;
@@ -36,6 +37,7 @@ public class ImpostorAgentPerc extends Perception
         this.crewPresentSensor.addAll(crewPresent);
         this.sabotable = sabotable;
         this.gameTime = gameTime;
+        this.extraSensorAvailable = extraSensorAvailable;
     }
 
     public String getCurrentRoomSensor() {
@@ -61,6 +63,12 @@ public class ImpostorAgentPerc extends Perception
     public Long getGameTime() {
         return gameTime;
     }
+
+    public boolean isExtraSensorAvailable() {
+        return extraSensorAvailable;
+    }
+    
+    
     
     
     
