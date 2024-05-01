@@ -19,6 +19,13 @@ public class CrewMember
     public void setState(CrewMemberState state) {
         this.state = state;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    
+    
     
     
 
