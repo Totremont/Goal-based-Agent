@@ -35,6 +35,24 @@ public class RoomState
         this.isSabotable = isSabotable;
     }
 
+    public ArrayList<CrewMember> getCurrentMembers() {
+        return currentMembers;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
+
+    public Boolean getAgentPresent() {
+        return agentPresent;
+    }
+
+    public Boolean getIsSabotable() {
+        return isSabotable;
+    }
+    
+    
+
     
     
 

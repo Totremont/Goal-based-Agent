@@ -1,6 +1,8 @@
 
 package amongus.models;
 
+import amongus.models.enums.Cardinal;
+import amongus.models.enums.RoomType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,22 +55,10 @@ public class Room
         }
         else System.out.printf("El vecino %s ya existe en %s",room.getName(), this.getName());
     }
-    
-    //-- Enumerables --   
-    
-    public enum RoomType
-    {
-        SECCION, PASILLO, TUBERIA
-    }
-    
-    //Dirección cardinal
-    public enum Cardinal
-    {
-        OESTE, NORTE,ESTE,SUR, TUB  //Se necesitarían más direcciones para añadir tuberias. - controlar esto
-    }
+     
     
     //Obtiene la dirección opuesta a la dada
-    private Cardinal opposite(Cardinal cardinal)
+    private static Cardinal opposite(Cardinal cardinal)
     {
         if(cardinal.equals(Cardinal.TUB)) return Cardinal.TUB;
         
