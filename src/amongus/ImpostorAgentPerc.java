@@ -14,9 +14,9 @@ public class ImpostorAgentPerc extends Perception
     private List<String> cardinalSensor = new ArrayList<>(4);    //[O,N,E,S]
     private List<String> crewPresentSensor = new ArrayList<>();
     private Long energySensor;
-    private boolean sabotable;
-    private Long gameTime;
-    private boolean extraSensorAvailable;
+    private String sabotageSensor;
+    private Long gameTimeSensor;
+    private boolean extraSensorAvail;
     
     
 
@@ -28,16 +28,16 @@ public class ImpostorAgentPerc extends Perception
     }
 
     public ImpostorAgentPerc(
-            String currentRoom,String previousRoom, Long energy, List<String> neighbors, 
-            List<String> crewPresent, boolean sabotable, Long gameTime, boolean extraSensorAvailable) 
+            String currentRoom, Long energy, List<String> neighbors, 
+            List<String> crewPresent, String sabotage, Long gameTime, boolean extraSensorAvail) 
     {
         this.currentRoomSensor = currentRoom;
         this.energySensor = energy;
         this.cardinalSensor.addAll(neighbors);
         this.crewPresentSensor.addAll(crewPresent);
-        this.sabotable = sabotable;
-        this.gameTime = gameTime;
-        this.extraSensorAvailable = extraSensorAvailable;
+        this.sabotageSensor = sabotage;
+        this.gameTimeSensor = gameTime;
+        this.extraSensorAvail = extraSensorAvail;
     }
 
     public String getCurrentRoomSensor() {
@@ -56,16 +56,16 @@ public class ImpostorAgentPerc extends Perception
         return energySensor;
     }
 
-    public boolean isSabotable() {
-        return sabotable;
+    public String getSabotage() {
+        return sabotageSensor;
     }
 
     public Long getGameTime() {
-        return gameTime;
+        return gameTimeSensor;
     }
 
-    public boolean isExtraSensorAvailable() {
-        return extraSensorAvailable;
+    public boolean isExtraSensorAvail() {
+        return extraSensorAvail;
     }
     
     

@@ -44,11 +44,20 @@ public abstract class MoveAbstract extends SearchAction
         if(nextRoomState == null)   //Si no conozco la habitación a la que me dirijo
         {
             //Creo un state con información desconocida
-            nextRoomState = agentState.new RoomState(nextRoom,null,-1,null);
+            nextRoomState = agentState.new RoomState(nextRoom,null,-1,null,null);
+            
+            agentState.setLastAction(ActionType.MOVE_TO_UNKNOWN);
         }
+        else if(agentState.getPreviousRoom().getName() == nextRoomState.getName())  //Si es la habitación anterior
+        { 
+            agentState.setLastAction(ActionType.MOVE_TO_PREVIOUS); 
+        } 
+        else agentState.setLastAction(ActionType.MOVE_TO_KNOWN); //Si es una habitación conocida aleatoria
         
         agentState.setCurrentRoom(nextRoomState);
         agentState.setEnergy(energy);
+        
+        agentState.setNextAction(true);
         
         return agentState;
         
