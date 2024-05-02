@@ -1,8 +1,7 @@
 
 package amongus;
 
-import amongus.actions.ActionType;
-import amongus.models.Room;
+import amongus.models.AgentRoomState;
 import amongus.utils.Pair;
 import frsf.cidisi.faia.agent.Perception;
 import frsf.cidisi.faia.agent.search.SearchBasedAgentState;
@@ -13,13 +12,13 @@ import java.util.List;
 //Subconjunto de datos del mapa que el agente conoce y guarda
 public class ImpostorAgentState extends SearchBasedAgentState 
 {
-    private RoomState currentRoom;
+    private AgentRoomState currentRoom;
     
     //Habitación de la que vengo
-    private RoomState previousRoom;
+    private AgentRoomState previousRoom;
     
     //Habitaciones conocidas / Submapa del agente
-    private final HashMap<String,RoomState> knownRooms = new HashMap<>();
+    private final HashMap<String,AgentRoomState> knownRooms = new HashMap<>();
     
     private final List<String> crewKilled = new ArrayList<>();
     
@@ -36,96 +35,32 @@ public class ImpostorAgentState extends SearchBasedAgentState
     
     private boolean sensorAvailable;
     
+    /*
+    
     private ActionType lastAction;
     
     //Si el estado actual es producto de una acción futura (Acción generada en el arbol pero no aplicada al juego)
     private boolean nextAction;
-    
-    //Estado de una habitación según observa el agente. Es un subconjunto del estado real RoomState en la clase Room
-    public class RoomState
+*/
+    //Cuando se crea el estado se inicializa con información estática
+    public ImpostorAgentState(HashMap<String,AgentRoomState> gameRooms, HashMap<String, Pair<String,Long>> gameCrew, List<String> sabotages)
     {
-        private String name;
-        private final List<String> neighbors = new ArrayList<>();     //[O,N,E,S]
-        
-        //Última vez visitado
-        private Long lastSeen;
-        
-        //Tripulantes encontrados
-        private List<String> crewPresent = new ArrayList<>();
-        
-        private String sabotage;
-
-        public RoomState(String name, List<String> neighbors, long lastSeen, List<String> crewPresent, String sabotage) 
-        {
-            this.name = name;
-            this.neighbors.addAll(neighbors);
-            this.lastSeen = lastSeen;
-            this.crewPresent.addAll(crewPresent);
-            this.sabotage = sabotage;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public List<String> getNeighbors() {
-            return neighbors;
-        }
-
-        public Long getLastSeen() {
-            return lastSeen;
-        }
-
-        public List<String> getCrewPresent() {
-            return crewPresent;
-        }
-        
-        public void deleteCrew(String name)
-        {
-            this.crewPresent = this.crewPresent.stream().filter(it -> it != name).toList();
-        }
-        
-        public boolean isSabotable()
-        {
-            return this.sabotage != null;
-        }
-        
-        public String getSabotage()
-        {
-            return this.sabotage;
-        }
-        
-        public void setSabotage(String name)
-        {
-            this.sabotage = name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public void setLastSeen(Long lastSeen) {
-            this.lastSeen = lastSeen;
-        }
-
-        public void setCrewPresent(List<String> crewPresent) {
-            this.crewPresent = crewPresent;
-        }
-        
-        
-          
+        this.knownRooms.putAll(knownRooms);
+        this.knownCrew.putAll(gameCrew); 
+        this.sabotages.addAll(sabotages);
     }
+    
      
     @Override   //Actualizamos estado en base a cambios en el mundo
     public void updateState(Perception p) 
     {
         ImpostorAgentPerc agentPerc = (ImpostorAgentPerc) p;
-        RoomState roomState = this.knownRooms.get(agentPerc.getCurrentRoomSensor());
+        AgentRoomState roomState = this.knownRooms.get(agentPerc.getCurrentRoomSensor());
         
         //Es una nueva habitación
         if(roomState == null)
         {
-            roomState = new RoomState(
+            roomState = new AgentRoomState(
                 agentPerc.getCurrentRoomSensor(), 
                 agentPerc.getCardinalSensor(),
                 agentPerc.getGameTime(),
@@ -184,11 +119,11 @@ public class ImpostorAgentState extends SearchBasedAgentState
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    public RoomState getCurrentRoom() {
+    public AgentRoomState getCurrentRoom() {
         return currentRoom;
     }
 
-    public HashMap<String, RoomState> getKnownRooms() {
+    public HashMap<String, AgentRoomState> getKnownRooms() {
         return knownRooms;
     }
 
@@ -212,7 +147,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
         return energy;
     }
 
-    public void setCurrentRoom(RoomState currentRoom) 
+    public void setCurrentRoom(AgentRoomState currentRoom) 
     {
         this.previousRoom = this.currentRoom;
         this.currentRoom = currentRoom;
@@ -226,7 +161,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
         this.energy = energy;
     }
 
-    public RoomState getPreviousRoom() {
+    public AgentRoomState getPreviousRoom() {
         return previousRoom;
     }
     
@@ -252,6 +187,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
         return doneSabotages;
     }
 
+    /*
     public ActionType getLastAction() {
         return lastAction;
     }
@@ -267,6 +203,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
     public void setNextAction(boolean nextAction) {
         this.nextAction = nextAction;
     }
+*/
     
     
     

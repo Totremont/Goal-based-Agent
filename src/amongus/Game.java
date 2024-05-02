@@ -1,14 +1,17 @@
 
 package amongus;
 
+import amongus.models.AgentRoomState;
 import amongus.models.Room;
 import amongus.models.RoomState;
 import amongus.models.Sabotage;
 import amongus.models.enums.Cardinal;
 import amongus.models.enums.RoomType;
+import amongus.utils.Pair;
 import frsf.cidisi.faia.agent.Perception;
 import frsf.cidisi.faia.environment.Environment;
 import frsf.cidisi.faia.state.EnvironmentState;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -17,6 +20,8 @@ public class Game extends Environment
 {
     public final HashMap<String,Room> map = new HashMap<>();
     public final HashMap<String, Sabotage> sabotages = new HashMap<>();
+    
+    private final ImpostorAgent agent;
 
     // -- Parámetros de juego
     public int MAX_ENERGY = 150;
@@ -28,7 +33,7 @@ public class Game extends Environment
     public int MAX_AGENT_SENSOR_STEP_TIME = 5;
     public int MIN_AGENT_SENSOR_STEP_TIME = 3;
     
-    private final GameState state = new GameState(this);
+    private final GameState state;
 
     public Game(int maxEnergy, int minEnergy, int maxCrew, int minCrew) 
     {
@@ -40,6 +45,36 @@ public class Game extends Environment
         
         //Setear mapa del juego
         setGameMap(this.map,this.sabotages);
+        
+        //Setear estado inicial
+        this.state = new GameState(this);
+        
+        //Crear agente - Mapeando información a su formato
+        //Mapear mapa
+        HashMap<String,AgentRoomState> gameRooms = new HashMap<>();
+        this.map.forEach((key,val) -> 
+        {
+            List<String> neighbors = val.getNeighbors().stream().map(it -> it.getName()).toList();
+            String sabotage = val.getSabotage() != null ? val.getSabotage().getName() : null;
+            var roomState = new AgentRoomState(val.getName(),neighbors,-1l,null,sabotage);
+            gameRooms.put(key,roomState);
+        });
+        
+        //Mapear tripulantes
+        HashMap<String,Pair<String,Long>> gameCrew = new HashMap<>();
+        this.state.getCrews().stream().forEach(crew -> 
+        {
+           gameCrew.put(crew.getName(), new Pair(null,-1l));
+        });
+        
+        //Mapear sabotages
+        List<String> sabotages = new ArrayList<>();
+        this.sabotages.forEach((key,val) -> 
+        {
+            sabotages.add(key);
+        });
+                
+        agent = new ImpostorAgent(gameRooms,gameCrew,sabotages);
     }
     
     
