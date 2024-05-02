@@ -12,21 +12,28 @@ public class Room
 {
     private final String name;
     private final RoomType type;
-    private final Sabotage sabotage;
     
+    private Sabotage sabotage = null;
     private List<Room> neighbors = new ArrayList<>(5);  //[O,N,E,S,T]
-    
     private RoomState state;
 
-    public Room(String name, RoomType type, Sabotage sabotage) 
+    public Room(String name, RoomType type) 
     {
         this.name = name;
         this.type = type;
-        this.sabotage = sabotage;
     }
 
     public void setState(RoomState state) {
         this.state = state;
+    }
+    
+    public void setSabotage(Sabotage sabotage)
+    {
+        this.sabotage = sabotage;
+        if(sabotage != null)
+        {
+            this.sabotage.setRoom(this);
+        }
     }
     
     

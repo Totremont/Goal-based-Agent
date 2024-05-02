@@ -6,6 +6,7 @@ import amongus.models.CrewMemberState;
 import amongus.models.Room;
 import amongus.models.RoomState;
 import amongus.models.Sabotage;
+import amongus.utils.Utils;
 import frsf.cidisi.faia.state.EnvironmentState;
 import java.util.HashMap;
 import java.util.List;
@@ -19,16 +20,20 @@ public class GameState extends EnvironmentState
     private final Game environment;
     
     private final HashMap<String,Room> map;
-    private final List<CrewMember> crews = new ArrayList<>();
-    
+    private final HashMap<String,Sabotage> sabotages;
     private final List<RoomState> roomStates = new ArrayList<>();
+    
+    private final List<CrewMember> crews = new ArrayList<>();
     private final List<CrewMemberState> crewStates = new ArrayList<>();
     
     private Room agentRoom;
     private Long agentEnergy;
-    private boolean agentExtraSensor;
+    private boolean agentSensorAvail;
     
-    private long gameTime;
+    //Cuando estuvo activo por última vez
+    private Long agentSensorLastTime;
+    
+    private Long gameTime;
     
     //Se activa cuando el juego debe darle información extrasensorial al agente (en la sgte percepción)
     //Sucede si el agente acciona su sensor
@@ -39,6 +44,7 @@ public class GameState extends EnvironmentState
         this.initState();
         this.environment = environment;
         this.map = this.environment.map;
+        this.sabotages = this.environment.sabotages;
     }
     
     
@@ -46,13 +52,10 @@ public class GameState extends EnvironmentState
     public void initState() 
     {
         //Seteamos hora
-        gameTime = 0;
-        
-        //Obtiene un número entre min y max
-        BiFunction<Integer,Integer,Long> randomBetween = (max,min) -> Math.round((Math.random()*max + min) % (max + 1));
-        
-        Long agentEnergy = randomBetween.apply(environment.MAX_ENERGY,environment.MIN_ENERGY);
-        Long totalCrew = randomBetween.apply(environment.MAX_CREW,environment.MIN_CREW);
+        this.gameTime = 0l;
+          
+        Long agentEnergy = Utils.randomBetween.apply(environment.MAX_ENERGY,environment.MIN_ENERGY);
+        Long totalCrew = Utils.randomBetween.apply(environment.MAX_CREW,environment.MIN_CREW);
         
         boolean agentExtraSensor = Math.round(Math.random()) == 0;   //Sensor activado inicialmente?
         
@@ -66,25 +69,25 @@ public class GameState extends EnvironmentState
         });
         
         //Estado inicial del agente
-        int agentInitialIndex = randomBetween.apply(map.size() - 1,0).intValue();
+        int agentInitialIndex = Utils.randomBetween.apply(map.size() - 1,0).intValue();
         String agentRoomName = roomNames.get(agentInitialIndex);
         RoomState agentRoomState = map.get(agentRoomName).getState();
         agentRoomState.setAgentPresent(true);
         
         this.agentEnergy = agentEnergy;
-        this.agentExtraSensor = agentExtraSensor;
+        this.agentSensorAvail = agentExtraSensor;
         
         //Distribuir tripulantes en el mapa
         for(int i = 0; i < totalCrew; i++)
         {
             
-            int crewInitialIndex = randomBetween.apply(map.size() - 1,0).intValue();
+            int crewInitialIndex = Utils.randomBetween.apply(map.size() - 1,0).intValue();
             String crewRoomName = roomNames.get(crewInitialIndex);
               
             Room crewRoom = map.get(crewRoomName);
             
             CrewMember crew = new CrewMember(i);
-            CrewMemberState crewState = new CrewMemberState(crew,true,crewRoom);
+            CrewMemberState crewState = new CrewMemberState(crew,true,crewRoom,gameTime);
             crewRoom.getState().addMember(crew);
             crewStates.add(crewState);
             crews.add(crew);
@@ -116,15 +119,33 @@ public class GameState extends EnvironmentState
         this.agentEnergy = agentEnergy;
     }
 
-    public void setAgentExtraSensor(boolean agentExtraSensor) {
-        this.agentExtraSensor = agentExtraSensor;
-    }
-    
     public void addCrewKilled(String name)
     {
         CrewMember crew = this.crews.stream().filter(it -> it.getName() == name).findFirst().get();
         crew.getState().setIsAlive(false);
     }
+    
+    public void removeSabotage(String name)
+    {
+        this.sabotages.get(name).getRoom().getState().setIsSabotable(false);
+    }
+
+    public void setAgentSensorAvail(boolean agentSensorAvail) {
+        this.agentSensorAvail = agentSensorAvail;
+    }
+
+    public void setGameTime(Long gameTime) {
+        this.gameTime = gameTime;
+    }
+
+    public Long getAgentSensorLastTime() {
+        return agentSensorLastTime;
+    }
+
+    public void setAgentSensorLastTime(Long agentSensorLastTime) {
+        this.agentSensorLastTime = agentSensorLastTime;
+    }
+    
     
     // -- Getters
     public HashMap<String, Room> getMap() {
@@ -160,11 +181,11 @@ public class GameState extends EnvironmentState
         return agentEnergy;
     }
 
-    public boolean isAgentExtraSensor() {
-        return agentExtraSensor;
+    public boolean isAgentSensorAvail() {
+        return agentSensorAvail;
     }
 
-    public long getGameTime() {
+    public Long getGameTime() {
         return gameTime;
     } 
     
@@ -181,6 +202,15 @@ public class GameState extends EnvironmentState
     public void setOmniscientAgent(boolean omniscientAgent) {
         this.omniscientAgent = omniscientAgent;
     }
+    
+    public HashMap<String,Sabotage> getSabotages()
+    {
+        return this.sabotages;
+    }
+    
+    
+    
+    
     
     
     

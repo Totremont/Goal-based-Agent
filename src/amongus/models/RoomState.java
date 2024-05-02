@@ -52,7 +52,7 @@ public class RoomState
         return agentPresent;
     }
 
-    public Boolean getIsSabotable() {
+    public Boolean isSabotable() {
         return isSabotable;
     }
     
