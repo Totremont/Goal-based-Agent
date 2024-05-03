@@ -6,7 +6,9 @@ package amongus.actions;
 
 import amongus.GameState;
 import amongus.ImpostorAgentState;
+import amongus.models.AgentRoomState;
 import amongus.models.enums.Cardinal;
+import amongus.utils.Utils;
 import frsf.cidisi.faia.agent.search.SearchAction;
 import frsf.cidisi.faia.agent.search.SearchBasedAgentState;
 import frsf.cidisi.faia.state.AgentState;
@@ -33,31 +35,34 @@ public abstract class MoveAbstract extends SearchAction
     public SearchBasedAgentState execute(SearchBasedAgentState s) 
     {
         ImpostorAgentState agentState = (ImpostorAgentState) s;
+        
+        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
+        
         String nextRoom = agentState.getCurrentRoom().getNeighbors().get(this.direction.ordinal());
         
         //Si no hay habitación, abortar
         if(nextRoom == null) return null;
         
-        Long energy = agentState.getEnergy();
         
         var nextRoomState = agentState.getKnownRooms().get(nextRoom);
         if(nextRoomState == null)   //Si no conozco la habitación a la que me dirijo
         {
             //Creo un state con información desconocida
-            nextRoomState = agentState.new RoomState(nextRoom,null,-1,null,null);
+            nextRoomState = new AgentRoomState(nextRoom,null,-1,null,null);
             
-            agentState.setLastAction(ActionType.MOVE_TO_UNKNOWN);
+            //agentState.setLastAction(ActionType.MOVE_TO_UNKNOWN);
         }
         else if(agentState.getPreviousRoom().getName() == nextRoomState.getName())  //Si es la habitación anterior
         { 
-            agentState.setLastAction(ActionType.MOVE_TO_PREVIOUS); 
+            //agentState.setLastAction(ActionType.MOVE_TO_PREVIOUS); 
         } 
-        else agentState.setLastAction(ActionType.MOVE_TO_KNOWN); //Si es una habitación conocida aleatoria
+        else //agentState.setLastAction(ActionType.MOVE_TO_KNOWN); //Si es una habitación conocida aleatoria
         
         agentState.setCurrentRoom(nextRoomState);
-        agentState.setEnergy(energy);
         
-        agentState.setNextAction(true);
+        //agentState.setNextAction(true);
+        
+        Utils.energyPostCondition(agentState, ENERGY_COST);
         
         return agentState;
         
@@ -66,8 +71,7 @@ public abstract class MoveAbstract extends SearchAction
     @Override
     public Double getCost() 
     {
-        Long cost = DECISION_COST + ENERGY_COST;
-        return cost.doubleValue();
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override   //Ejecución real sobre el mundo

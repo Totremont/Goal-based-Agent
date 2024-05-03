@@ -10,30 +10,26 @@ import amongus.utils.Utils;
 import frsf.cidisi.faia.state.EnvironmentState;
 import java.util.HashMap;
 import java.util.List;
-import java.lang.Math;
 import java.util.ArrayList;
-import java.util.function.BiFunction;
 
-//El estado asocia un ambiente del mapa con su correspondiente estado
+//El GameState contiene el estado completo del juego
 public class GameState extends EnvironmentState 
 {
     private final Game environment;
     
+    //Atributos del mundo
     private final HashMap<String,Room> map;
     private final HashMap<String,Sabotage> sabotages;
-    private final List<RoomState> roomStates = new ArrayList<>();
+    private final List<RoomState> roomStates = new ArrayList<>();   
+    private final HashMap<String, CrewMember> crews = new HashMap<>();
+    private final List<CrewMemberState> crewStates = new ArrayList<>();   
+    private Long gameTime;
     
-    private final List<CrewMember> crews = new ArrayList<>();
-    private final List<CrewMemberState> crewStates = new ArrayList<>();
-    
+    //Atributos del agente
     private Room agentRoom;
     private Long agentEnergy;
-    private boolean agentSensorAvail;
-    
-    //Cuando estuvo activo por última vez
-    private Long agentSensorLastTime;
-    
-    private Long gameTime;
+    private boolean agentSensorAvail; 
+    private Long agentSensorLastTime; //Cuando estuvo activo por última vez
     
     //Se activa cuando el juego debe darle información extrasensorial al agente (en la sgte percepción)
     //Sucede si el agente acciona su sensor
@@ -41,19 +37,23 @@ public class GameState extends EnvironmentState
 
     public GameState(Game environment) 
     {
-        this.initState();
+        //Setear información estática
         this.environment = environment;
         this.map = this.environment.map;
         this.sabotages = this.environment.sabotages;
+        
+        //Setear estado inicial del juego
+        this.initState();
     }
     
     
     @Override
     public void initState() 
     {
-        //Seteamos hora
+        //Tiempo inicial
         this.gameTime = 0l;
-          
+        
+        //Energía del agente, cantidad de tripulantes, etc...
         Long agentEnergy = Utils.randomBetween.apply(environment.MAX_ENERGY,environment.MIN_ENERGY);
         Long totalCrew = Utils.randomBetween.apply(environment.MAX_CREW,environment.MIN_CREW);
         
@@ -62,18 +62,16 @@ public class GameState extends EnvironmentState
         List<String> roomNames = new ArrayList<>();    
         map.forEach((key,val) -> 
         {
-            roomNames.add(key);
-            
-            //Crear el initial state de cada ambiente
-            roomStates.add(new RoomState(val,false));
+            roomNames.add(key);               
+            roomStates.add(new RoomState(val)); //Crear el initial state de cada ambiente
         });
         
         //Estado inicial del agente
         int agentInitialIndex = Utils.randomBetween.apply(map.size() - 1,0).intValue();
         String agentRoomName = roomNames.get(agentInitialIndex);
-        RoomState agentRoomState = map.get(agentRoomName).getState();
-        agentRoomState.setAgentPresent(true);
         
+        this.agentRoom = map.get(agentRoomName);
+        this.agentRoom.getState().setAgentPresent(true);
         this.agentEnergy = agentEnergy;
         this.agentSensorAvail = agentExtraSensor;
         
@@ -82,130 +80,142 @@ public class GameState extends EnvironmentState
         {
             
             int crewInitialIndex = Utils.randomBetween.apply(map.size() - 1,0).intValue();
-            String crewRoomName = roomNames.get(crewInitialIndex);
-              
-            Room crewRoom = map.get(crewRoomName);
+            String crewRoomName = roomNames.get(crewInitialIndex);            
+            Room crewRoom = map.get(crewRoomName);  
             
             CrewMember crew = new CrewMember(i);
-            CrewMemberState crewState = new CrewMemberState(crew,true,crewRoom,gameTime);
+            CrewMemberState crewState = new CrewMemberState(crew,crewRoom,this.gameTime);
             crewRoom.getState().addMember(crew);
             crewStates.add(crewState);
-            crews.add(crew);
-      
+            crews.put(crew.getName(),crew);
         }  
     } 
     
-    //-- Setters para modificar el estado del juego
+    /*-- 
+        Setters que permiten modificar el estado del juego. Usado por acciones del agente y el WorldAction
+        Nota: SOLO GameState se encarga de modificar el estado del juego. 
+    */
     
-    //Cambiar habitación del agente
-    public void setAgentRoom(Room agentRoom) 
+    public void setAgentRoom(String newAgentRoom) 
     {
         RoomState currentRoomState = getAgentRoom().getState();
         currentRoomState.setAgentPresent(false);
         
-        RoomState newRoomState = agentRoom.getState();
-        newRoomState.setAgentPresent(true);
-        
-        this.agentRoom = agentRoom;
-    }
-    
-    public void setAgentRoom(String agentRoom) 
-    {
-        Room room = this.map.get(agentRoom);
-        this.setAgentRoom(room);
+        this.agentRoom = map.get(newAgentRoom);
+        this.agentRoom.getState().setAgentPresent(true);
+       
     }
 
-    public void setAgentEnergy(Long agentEnergy) {
+    public void setAgentEnergy(Long agentEnergy) 
+    {
         this.agentEnergy = agentEnergy;
     }
 
     public void addCrewKilled(String name)
     {
-        CrewMember crew = this.crews.stream().filter(it -> it.getName() == name).findFirst().get();
+        CrewMember crew = this.crews.get(name);
         crew.getState().setIsAlive(false);
+        crew.getState().getCurrentRoom().getState().deleteMember(crew);
     }
     
-    public void removeSabotage(String name)
+    public void setCrewRoom(String crewName, String roomName)
+    {
+        CrewMember crew = this.crews.get(crewName);
+        Room newRoom = this.map.get(roomName);
+        crew.getState().getCurrentRoom().getState().deleteMember(crew);
+        crew.getState().setCurrentRoom(newRoom);
+    }
+    
+    public void removeSabotage(String name) //Cuando se completa un sabotaje
     {
         this.sabotages.get(name).getRoom().getState().setIsSabotable(false);
     }
 
-    public void setAgentSensorAvail(boolean agentSensorAvail) {
+    public void setAgentSensorAvail(boolean agentSensorAvail) 
+    {    
         this.agentSensorAvail = agentSensorAvail;
     }
 
-    public void setGameTime(Long gameTime) {
+    public void setGameTime(Long gameTime) 
+    {
         this.gameTime = gameTime;
     }
 
-    public Long getAgentSensorLastTime() {
-        return agentSensorLastTime;
-    }
-
-    public void setAgentSensorLastTime(Long agentSensorLastTime) {
+    public void setAgentSensorLastTime(Long agentSensorLastTime) 
+    {
         this.agentSensorLastTime = agentSensorLastTime;
     }
     
-    
+    public void setOmniscientAgent(boolean omniscientAgent) 
+    {
+        this.omniscientAgent = omniscientAgent;
+    }
+     
     // -- Getters
-    public HashMap<String, Room> getMap() {
+    public HashMap<String, Room> getMap() 
+    {
         return map;
     }
 
-    public List<RoomState> getRoomStates() {
+    public List<RoomState> getRoomStates() 
+    {
         return roomStates;
     }
 
-    public List<CrewMember> getCrews() {
+    public HashMap<String,CrewMember> getCrews() 
+    {
         return crews;
     }
 
-    public Game getEnvironment() {
+    public Game getEnvironment() 
+    {
         return environment;
     }
 
-    public List<CrewMemberState> getCrewStates() {
+    public List<CrewMemberState> getCrewStates() 
+    {
         return crewStates;
     }
 
     public Room getAgentRoom() 
     {
-        if(agentRoom == null)
-        {
-            agentRoom = roomStates.stream().filter(it -> it.getAgentPresent()).findFirst().get().getRoom();
-        }
         return agentRoom;
     }
 
-    public Long getAgentEnergy() {
+    public Long getAgentEnergy() 
+    {
         return agentEnergy;
     }
+    
+    public Long getAgentSensorLastTime() 
+    {
+        return agentSensorLastTime;
+    }
 
-    public boolean isAgentSensorAvail() {
+    public boolean isAgentSensorAvail() 
+    {
         return agentSensorAvail;
     }
 
-    public Long getGameTime() {
+    public Long getGameTime() 
+    {
         return gameTime;
     } 
+    
+    public boolean isOmniscientAgent() 
+    {
+        return omniscientAgent;
+    }
+        
+    public HashMap<String,Sabotage> getSabotages()
+    {
+        return this.sabotages;
+    }
     
     @Override
     public String toString() 
     {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    public boolean isOmniscientAgent() {
-        return omniscientAgent;
-    }
-
-    public void setOmniscientAgent(boolean omniscientAgent) {
-        this.omniscientAgent = omniscientAgent;
-    }
-    
-    public HashMap<String,Sabotage> getSabotages()
-    {
-        return this.sabotages;
     }
     
     

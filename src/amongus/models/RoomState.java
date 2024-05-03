@@ -14,11 +14,11 @@ public class RoomState
     private Boolean isSabotable;
 
     //Initial state
-    public RoomState(Room room, Boolean agentPresent) 
+    public RoomState(Room room) 
     {
-        this.agentPresent = agentPresent;
         this.room = room;
         room.setState(this);
+        this.agentPresent = false;
         isSabotable = room.getSabotage() != null;
     }
 

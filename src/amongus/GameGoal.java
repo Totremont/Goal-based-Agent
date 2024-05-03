@@ -3,6 +3,7 @@
 package amongus;
 
 import amongus.actions.ActionType;
+import frsf.cidisi.faia.agent.Action;
 import frsf.cidisi.faia.agent.search.GoalTest;
 import frsf.cidisi.faia.state.AgentState;
 
@@ -19,14 +20,11 @@ Prueba de meta blanda (intermedia, para tomar la sgte acción):
 
 public class GameGoal extends GoalTest 
 {
-    
     public GameState gameState;
 
     public GameGoal(GameState gameState) {
         this.gameState = gameState;
     }
-    
-    
 
     @Override
     public boolean isGoalState(AgentState agentState) 
@@ -40,8 +38,13 @@ public class GameGoal extends GoalTest
         if(crewKilledTest && doneSabotageTest) return true;
         
         //Cualquier siguiente acción es válida
-        return agent.isNextAction();
-        
+        //return agent.isNextAction();  
+    }
+    
+    //Si no es estado final y se quedó sin energía perdió
+    public boolean agentFailed(AgentState agentState) 
+    {
+        return !this.isGoalState(agentState) && gameState.getAgentEnergy() == 0;
     }
 
     

@@ -1,6 +1,7 @@
 
 package amongus;
 
+import amongus.utils.Pair;
 import frsf.cidisi.faia.agent.Agent;
 import frsf.cidisi.faia.agent.Perception;
 import frsf.cidisi.faia.environment.Environment;
@@ -18,18 +19,16 @@ public class ImpostorAgentPerc extends Perception
     private Long gameTimeSensor;
     private boolean extraSensorAvail;
     
+    //Lista de pares entre un tripulante y su ubicación (extrasensorial).
+    private List<Pair<String,String>> extraSensor = new ArrayList<>();
+    private boolean extraInfoAvail;
     
-
-    //Innecesario puesto que el juego crea e inicializa las percepciones.
-    @Override
-    public void initPerception(Agent agent, Environment environment) 
-    {
-
-    }
-
-    public ImpostorAgentPerc(
-            String currentRoom, Long energy, List<String> neighbors, 
-            List<String> crewPresent, String sabotage, Long gameTime, boolean extraSensorAvail) 
+    
+    public ImpostorAgentPerc     //Constructor normal
+    (
+        String currentRoom, Long energy, List<String> neighbors, 
+        List<String> crewPresent, String sabotage, Long gameTime, boolean extraSensorAvail
+    ) 
     {
         this.currentRoomSensor = currentRoom;
         this.energySensor = energy;
@@ -38,6 +37,20 @@ public class ImpostorAgentPerc extends Perception
         this.sabotageSensor = sabotage;
         this.gameTimeSensor = gameTime;
         this.extraSensorAvail = extraSensorAvail;
+        this.extraInfoAvail = false;
+    }
+        
+    public ImpostorAgentPerc    //Constructor especial extrasensorial
+    (
+        String currentRoom, Long energy, List<String> neighbors, 
+        List<String> crewPresent, String sabotage, Long gameTime, 
+        boolean extraSensorAvail, List<Pair<String,String>> extraSensor
+            
+    ) 
+    {
+        this(currentRoom,energy,neighbors,crewPresent,sabotage,gameTime,extraSensorAvail);
+        this.extraSensor.addAll(extraSensor);
+        this.extraInfoAvail = true;
     }
 
     public String getCurrentRoomSensor() {
@@ -67,6 +80,19 @@ public class ImpostorAgentPerc extends Perception
     public boolean isExtraSensorAvail() {
         return extraSensorAvail;
     }
+    
+    public boolean isExtraInfoAvail() {
+        return extraInfoAvail;
+    }
+
+    public List<Pair<String, String>> getExtraSensor() {
+        return extraSensor;
+    }
+    
+    
+    
+    @Override   //Innecesario puesto que el juego crea e inicializa las percepciones.
+    public void initPerception(Agent agent, Environment environment) {}
     
     
     

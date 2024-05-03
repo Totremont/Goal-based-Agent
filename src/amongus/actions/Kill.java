@@ -5,6 +5,7 @@ package amongus.actions;
 import amongus.GameState;
 import amongus.ImpostorAgentState;
 import amongus.models.CrewMemberState;
+import amongus.utils.Utils;
 import frsf.cidisi.faia.agent.search.SearchAction;
 import frsf.cidisi.faia.agent.search.SearchBasedAgentState;
 import frsf.cidisi.faia.state.AgentState;
@@ -13,11 +14,14 @@ import frsf.cidisi.faia.state.EnvironmentState;
 
 public class Kill extends SearchAction 
 {
+    private final Long ENERGY_COST = 1l;
 
     @Override
     public SearchBasedAgentState execute(SearchBasedAgentState s) 
     {
         var agentState = (ImpostorAgentState) s;
+        
+        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
         
         //Si no hay nadie, abortar
         if(agentState.getCurrentRoom().getCrewPresent().isEmpty()) return null;
@@ -28,6 +32,8 @@ public class Kill extends SearchAction
         agentState.addCrewKilled(crew);
         
         agentState.getCurrentRoom().deleteCrew(crew);
+        
+        Utils.energyPostCondition(agentState, ENERGY_COST);
         
         return agentState;
         
@@ -50,6 +56,8 @@ public class Kill extends SearchAction
         String crewKilled = agentState.getCrewKilled().get(agentState.getCrewKilled().size() - 1);
         
         gameState.addCrewKilled(crewKilled);
+        
+        gameState.setAgentEnergy(agentState.getEnergy());
         
         return gameState;
         

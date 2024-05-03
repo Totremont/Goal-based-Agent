@@ -13,11 +13,9 @@ import java.util.List;
 public class ImpostorAgentState extends SearchBasedAgentState 
 {
     private AgentRoomState currentRoom;
+    private AgentRoomState previousRoom;    //Habitación de la que vengo
     
-    //Habitación de la que vengo
-    private AgentRoomState previousRoom;
-    
-    //Habitaciones conocidas / Submapa del agente
+    //Habitaciones conocidas / Submapa del agente -> Nota: Se asume que conoce todo
     private final HashMap<String,AgentRoomState> knownRooms = new HashMap<>();
     
     private final List<String> crewKilled = new ArrayList<>();
@@ -25,32 +23,22 @@ public class ImpostorAgentState extends SearchBasedAgentState
     //Nombre del tripulante vivo / última ubicación conocida - tiempo 
     private final HashMap<String, Pair<String,Long>> knownCrew = new HashMap<>();
     
-    private final List<String> sabotages = new ArrayList<>();
-    
+    private final List<String> sabotages = new ArrayList<>();       //Total a cumplir 
     private final List<String> doneSabotages = new ArrayList<>();
     
     private Long gameTime;
-    
     private Long energy;
-    
     private boolean sensorAvailable;
     
-    /*
-    
-    private ActionType lastAction;
-    
-    //Si el estado actual es producto de una acción futura (Acción generada en el arbol pero no aplicada al juego)
-    private boolean nextAction;
-*/
-    //Cuando se crea el estado se inicializa con información estática
+
+    //Cuando se crea el primer estado se inicializa con información estática
     public ImpostorAgentState(HashMap<String,AgentRoomState> gameRooms, HashMap<String, Pair<String,Long>> gameCrew, List<String> sabotages)
     {
         this.knownRooms.putAll(knownRooms);
         this.knownCrew.putAll(gameCrew); 
         this.sabotages.addAll(sabotages);
     }
-    
-     
+      
     @Override   //Actualizamos estado en base a cambios en el mundo
     public void updateState(Perception p) 
     {
@@ -91,11 +79,50 @@ public class ImpostorAgentState extends SearchBasedAgentState
             this.knownCrew.put(it,new Pair(agentPerc.getCurrentRoomSensor(),agentPerc.getGameTime()));
         });
         
+        //Si tengo información extrasensorial
+        if(agentPerc.isExtraInfoAvail())
+        {
+            agentPerc.getExtraSensor().stream().forEach(it -> 
+            {
+                this.knownCrew.put(it.getFirst(),new Pair(it.getSecond(),agentPerc.getGameTime()));
+            });
+        }
+        
         this.gameTime = agentPerc.getGameTime();
         
         this.energy = agentPerc.getEnergySensor();
         
         this.sensorAvailable = agentPerc.isExtraSensorAvail();
+    }
+    
+    // -- Setters que modifican el estado cuando se ejecuta una acción
+    
+    public void setCurrentRoom(AgentRoomState currentRoom) 
+    {
+        this.previousRoom = this.currentRoom;
+        this.currentRoom = currentRoom;
+    }
+
+    public void setGameTime(Long gameTime) {
+        this.gameTime = gameTime;
+    }
+
+    public void setEnergy(Long energy) {
+        this.energy = energy;
+    }
+    
+    public void setSensorAvailable(boolean sensorAvailable) {
+        this.sensorAvailable = sensorAvailable;
+    }
+    
+    public void addDoneSabotage(String name)
+    {
+        this.doneSabotages.add(name);
+    }
+    
+    public void addCrewKilled(String name)
+    {
+        this.crewKilled.add(name);
     }
     
     @Override
@@ -114,10 +141,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    @Override
-    public void initState() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    //--Getters
 
     public AgentRoomState getCurrentRoom() {
         return currentRoom;
@@ -147,63 +171,22 @@ public class ImpostorAgentState extends SearchBasedAgentState
         return energy;
     }
 
-    public void setCurrentRoom(AgentRoomState currentRoom) 
-    {
-        this.previousRoom = this.currentRoom;
-        this.currentRoom = currentRoom;
-    }
-
-    public void setGameTime(Long gameTime) {
-        this.gameTime = gameTime;
-    }
-
-    public void setEnergy(Long energy) {
-        this.energy = energy;
-    }
-
     public AgentRoomState getPreviousRoom() {
         return previousRoom;
-    }
-    
-    public void addCrewKilled(String name)
-    {
-        this.crewKilled.add(name);
     }
 
     public boolean isSensorAvailable() {
         return sensorAvailable;
     }
 
-    public void setSensorAvailable(boolean sensorAvailable) {
-        this.sensorAvailable = sensorAvailable;
-    }
-    
-    public void addDoneSabotage(String name)
-    {
-        this.doneSabotages.add(name);
-    }
-
     public List<String> getDoneSabotages() {
         return doneSabotages;
     }
-
-    /*
-    public ActionType getLastAction() {
-        return lastAction;
+    
+    @Override
+    public void initState() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-
-    public void setLastAction(ActionType lastAction) {
-        this.lastAction = lastAction;
-    }
-
-    public boolean isNextAction() {
-        return nextAction;
-    }
-
-    public void setNextAction(boolean nextAction) {
-        this.nextAction = nextAction;
-    }
-*/
     
     
     

@@ -4,6 +4,7 @@ package amongus.actions;
 
 import amongus.GameState;
 import amongus.ImpostorAgentState;
+import amongus.utils.Utils;
 import frsf.cidisi.faia.agent.search.SearchAction;
 import frsf.cidisi.faia.agent.search.SearchBasedAgentState;
 import frsf.cidisi.faia.state.AgentState;
@@ -13,16 +14,22 @@ import frsf.cidisi.faia.state.EnvironmentState;
 
 public class ActivateSensor extends SearchAction 
 {
+    
+    public final Long ENERGY_COST = 1l;
 
     @Override
     public SearchBasedAgentState execute(SearchBasedAgentState s) 
     {
         var agentState = (ImpostorAgentState) s;
         
+        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
+        
         //Si no esta el sensor disponible, abortar
         if(!agentState.isSensorAvailable()) return null;
         
         agentState.setSensorAvailable(false);
+        
+        Utils.energyPostCondition(agentState, ENERGY_COST);
         
         return agentState;
     }
@@ -42,6 +49,8 @@ public class ActivateSensor extends SearchAction
         var gameState = (GameState) est;
         
         gameState.setOmniscientAgent(true);
+        
+        gameState.setAgentEnergy(agentState.getEnergy());
         
         return gameState;
         
