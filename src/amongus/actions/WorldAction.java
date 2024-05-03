@@ -12,7 +12,7 @@ import java.util.List;
     Nota : Las acciones del agente se ejecutan -antes- de la acción del juego.
 */
 
-public class GameAction 
+public class WorldAction 
 {
     public GameState advanceGame(GameState gameState)
     {

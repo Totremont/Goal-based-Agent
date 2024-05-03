@@ -11,23 +11,26 @@ public class CrewMemberState {
     //Cuándo se movió por última vez
     private Long lastMoveTime;
 
-    public CrewMemberState(CrewMember crew, Boolean isAlive, Room room, Long lastMove) {
+    public CrewMemberState(CrewMember crew, Room room, Long createTime) {
         this.crew = crew;
-        this.isAlive = isAlive;
         this.crew.setState(this);
         this.currentRoom = room;
+        this.isAlive = true;
+        this.lastMoveTime = createTime;
     }
-
-    public Boolean getIsAlive() {
-        return isAlive;
+    
+    public void setCurrentRoom(Room currentRoom) 
+    {
+        this.currentRoom = currentRoom;
     }
 
     public void setIsAlive(Boolean isAlive) 
     {
         this.isAlive = isAlive;
-        
-        //Si no estoy vivo quitarme de la habitación (Pero guardar última habitación en este estado)
-        if(!this.isAlive) currentRoom.getState().deleteMember(this.crew);
+    }
+    
+    public void setLastMoveTime(Long lastMove) {
+        this.lastMoveTime = lastMove;
     }
 
     public CrewMember getCrew() {
@@ -38,18 +41,12 @@ public class CrewMemberState {
         return currentRoom;
     }
 
-    public void setCurrentRoom(Room currentRoom) 
-    {
-        this.currentRoom = currentRoom;
-        currentRoom.getState().addMember(this.getCrew());
+    public Boolean getIsAlive() {
+        return isAlive;
     }
 
     public Long getLastMoveTime() {
         return lastMoveTime;
-    }
-
-    public void setLastMoveTime(Long lastMove) {
-        this.lastMoveTime = lastMove;
     }
     
     
