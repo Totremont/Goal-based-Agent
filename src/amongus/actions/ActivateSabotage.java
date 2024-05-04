@@ -21,7 +21,7 @@ public class ActivateSabotage extends SearchAction
     {
         var agentState = (ImpostorAgentState) s;
         
-        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
+        //if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
         
         //Si no es saboteable, salir
         if(!agentState.getCurrentRoom().isSabotable()) return null;
@@ -33,7 +33,7 @@ public class ActivateSabotage extends SearchAction
         //Quitar sabotage
         agentState.getCurrentRoom().setSabotage(null);
         
-        Utils.energyPostCondition(agentState, ENERGY_COST);
+        //Utils.energyPostCondition(agentState, ENERGY_COST);
         
         return agentState;
         
@@ -49,7 +49,11 @@ public class ActivateSabotage extends SearchAction
     {
         var agentState = (ImpostorAgentState) ast;
         
+        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
+        
         if(this.execute(agentState) == null) return null;
+        
+        Utils.energyPostCondition(agentState, ENERGY_COST);
         
         GameState gameState = (GameState) est;
         

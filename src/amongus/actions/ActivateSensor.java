@@ -10,11 +10,10 @@ import frsf.cidisi.faia.agent.search.SearchBasedAgentState;
 import frsf.cidisi.faia.state.AgentState;
 import frsf.cidisi.faia.state.EnvironmentState;
 
-//Activar sensor extrasensorial
+//Activar sensor extrasensorial | No se puede utilizar como acción usando árboles. El juego se lo entrega automáticamente.
 
 public class ActivateSensor extends SearchAction 
 {
-    
     public final Long ENERGY_COST = 1l;
 
     @Override
@@ -22,14 +21,14 @@ public class ActivateSensor extends SearchAction
     {
         var agentState = (ImpostorAgentState) s;
         
-        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
+        //if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
         
         //Si no esta el sensor disponible, abortar
         if(!agentState.isSensorAvailable()) return null;
         
         agentState.setSensorAvailable(false);
         
-        Utils.energyPostCondition(agentState, ENERGY_COST);
+        //Utils.energyPostCondition(agentState, ENERGY_COST);
         
         return agentState;
     }
@@ -44,7 +43,11 @@ public class ActivateSensor extends SearchAction
     {
         var agentState = (ImpostorAgentState) ast;
         
+        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
+        
         if(this.execute(agentState) == null) return null;
+        
+        Utils.energyPostCondition(agentState, ENERGY_COST);
         
         var gameState = (GameState) est;
         

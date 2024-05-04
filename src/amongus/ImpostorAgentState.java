@@ -124,7 +124,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
     {
         this.crewKilled.add(name);
     }
-    
+
     @Override
     public boolean equals(Object obj) 
     {
@@ -182,6 +182,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
     public List<String> getDoneSabotages() {
         return doneSabotages;
     }
+ 
     
     @Override
     public void initState() {

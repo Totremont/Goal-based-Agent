@@ -8,6 +8,7 @@ import amongus.models.Sabotage;
 import amongus.models.enums.Cardinal;
 import amongus.models.enums.RoomType;
 import amongus.utils.Pair;
+import amongus.utils.Utils;
 import frsf.cidisi.faia.agent.Action;
 import frsf.cidisi.faia.agent.Perception;
 import frsf.cidisi.faia.environment.Environment;
@@ -69,20 +70,23 @@ public class Game extends Environment
         //--Creación del agente--
         
         //Mapeamos información de juego a tipo que entiende el agente.
+        List<String> roomNames = new ArrayList<>();
         HashMap<String,AgentRoomState> gameRooms = new HashMap<>();
         this.map.forEach((key,val) -> 
         {
+            roomNames.add(key);
             List<String> neighbors = val.getNeighbors().stream().map(it -> it.getName()).toList();
             String sabotage = val.getSabotage() != null ? val.getSabotage().getName() : null;
             var roomState = new AgentRoomState(val.getName(),neighbors,-1l,null,sabotage);
             gameRooms.put(key,roomState);
         });
         
-        //Mapear tripulantes
+        //Mapear tripulantes y, como el agente no sabe donde están, distribuirlos aleatoriamente.
         HashMap<String,Pair<String,Long>> gameCrew = new HashMap<>();
         this.state.getCrews().forEach((key,crew) -> 
         {
-           gameCrew.put(key, new Pair(null,-1l));
+           String randomRoom = roomNames.get(Utils.randomBetween.apply(map.size() - 1,0).intValue());
+           gameCrew.put(key, new Pair(randomRoom,0l));
         });
         
         //Mapear sabotages

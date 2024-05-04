@@ -68,8 +68,10 @@ public class WorldAction
             {   
                 gameState.setAgentSensorAvail(true);
                 gameState.setAgentSensorLastTime(gameState.getGameTime());
+                gameState.setOmniscientAgent(true);     //Se lo activa automáticamente
             }
-        }
+        } 
+        else gameState.setAgentSensorAvail(false);  //Sacarselo en la siguiente percepción
         
         return gameState;
         
