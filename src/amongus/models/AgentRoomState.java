@@ -16,7 +16,7 @@ public class AgentRoomState
     private Long lastSeen;
 
     //Tripulantes encontrados
-    private List<String> crewPresent = new ArrayList<>();
+    private final ArrayList<String> crewPresent = new ArrayList<>();
 
     private String sabotage;
 
@@ -47,7 +47,7 @@ public class AgentRoomState
 
     public void deleteCrew(String name)
     {
-        this.crewPresent = this.crewPresent.stream().filter(it -> it != name).toList();
+        this.crewPresent.remove(name);
     }
 
     public boolean isSabotable()
@@ -74,6 +74,6 @@ public class AgentRoomState
     }
 
     public void setCrewPresent(List<String> crewPresent) {
-        this.crewPresent = crewPresent;
+        this.crewPresent.addAll(crewPresent);
     }
 }

@@ -19,11 +19,8 @@ public abstract class MoveAbstract extends SearchAction
     protected final Long ENERGY_COST = 1l;
     
     /*
-        DECISION_COST Mide la conveniencia de ejecutar una acción para alcanzar el objetivo.
-        Acciones que más acercan al agente a ganar tienen menor coste. 
-        Ej: Matar, Sabotear -> 1 ; Moverse habitación nueva  -> 2 ; -> Moverse habitación vieja -> 8;
-    */    
-    protected Long DECISION_COST = 2l;
+        En el arbol de búsqueda, las acciones no consumen energía.
+    */
     
     protected Cardinal direction;
 
@@ -36,7 +33,7 @@ public abstract class MoveAbstract extends SearchAction
     {
         ImpostorAgentState agentState = (ImpostorAgentState) s;
         
-        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
+        //if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
         
         String nextRoom = agentState.getCurrentRoom().getNeighbors().get(this.direction.ordinal());
         
@@ -62,7 +59,7 @@ public abstract class MoveAbstract extends SearchAction
         
         //agentState.setNextAction(true);
         
-        Utils.energyPostCondition(agentState, ENERGY_COST);
+        //Utils.energyPostCondition(agentState, ENERGY_COST);
         
         return agentState;
         
@@ -78,8 +75,13 @@ public abstract class MoveAbstract extends SearchAction
     public EnvironmentState execute(AgentState ast, EnvironmentState est) 
     {
         var agentState = (ImpostorAgentState) ast;
+        
+        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
+        
         //Modificamos el estado del agente
         if(this.execute(agentState) == null) return null;
+        
+        Utils.energyPostCondition(agentState, ENERGY_COST);
         
         //Modificamos el estado del ambiente
         GameState gameState = (GameState) est;

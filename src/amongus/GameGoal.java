@@ -2,8 +2,6 @@
 
 package amongus;
 
-import amongus.actions.ActionType;
-import frsf.cidisi.faia.agent.Action;
 import frsf.cidisi.faia.agent.search.GoalTest;
 import frsf.cidisi.faia.state.AgentState;
 
@@ -35,13 +33,10 @@ public class GameGoal extends GoalTest
         boolean crewKilledTest = agent.getCrewKilled().size() == gameState.getCrews().size();
         boolean doneSabotageTest = agent.getDoneSabotages().size() == gameState.getSabotages().size();
         
-        if(crewKilledTest && doneSabotageTest) return true;
-        
-        //Cualquier siguiente acción es válida
-        //return agent.isNextAction();  
+        return crewKilledTest && doneSabotageTest; 
     }
     
-    //Si no es estado final y se quedó sin energía perdió
+    //Si no es estado final y se quedó sin energía, perdió
     public boolean agentFailed(AgentState agentState) 
     {
         return !this.isGoalState(agentState) && gameState.getAgentEnergy() == 0;
