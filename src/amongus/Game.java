@@ -28,8 +28,8 @@ public class Game extends Environment
     // -- Parámetros de juego
     public int MAX_ENERGY = 150;
     public int MIN_ENERGY = 30;
-    public int MAX_CREW = 10;
-    public int MIN_CREW = 7;
+    public int MAX_CREW = 6;       //Se banca hasta 6 confirmado | Más de 6 dudoso
+    public int MIN_CREW = 5;
     public int MAX_CREW_STEP_TIME = 3;
     public int MIN_CREW_STEP_TIME = 1;
     public int MAX_AGENT_SENSOR_STEP_TIME = 5;
@@ -41,7 +41,7 @@ public class Game extends Environment
     //Constructor con valores por defecto
     public Game()
     {
-        this(150,30,3,2,3,1,5,3);
+        this(150,30,6,5,3,1,5,3);
     }
     
     //Constructor de juego
@@ -136,7 +136,7 @@ public class Game extends Environment
        if(state.isOmniscientAgent())    //Darle información extrasensorial
        {
            List<Pair<String,String>> crewLocations = new ArrayList<>();
-           crewLocations.addAll(this.state.getCrewStates().stream().map
+           crewLocations.addAll(this.state.getCrewStates().stream().filter(it -> it.isAlive()).map
             (
                 state -> {return new Pair<>(state.getCrew().getName(),state.getCurrentRoom().getName());}
             ).toList());

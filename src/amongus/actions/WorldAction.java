@@ -23,7 +23,7 @@ public class WorldAction
         gameState.setGameTime(gameState.getGameTime() + 1);
         
         //Tarda: MIN_CREW_STEP_TIME en moverse como mínimo y MAX_CREW_STEP_TIME como máximo
-        crewStates.stream().forEach(it -> 
+        crewStates.stream().filter(it -> it.isAlive()).forEach(it -> 
         {
             
             int currentTime = gameState.getGameTime().intValue();

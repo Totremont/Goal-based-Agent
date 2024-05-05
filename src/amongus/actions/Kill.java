@@ -14,6 +14,10 @@ import frsf.cidisi.faia.state.EnvironmentState;
 public class Kill extends SearchAction 
 {
     private final Long ENERGY_COST = 1l;
+    
+    //Decision cost marca que tan favorable es una acción | Se utiliza en costo uniforme
+    //Menor coste == Mejor decisión
+    protected final Long DECISION_COST = 1l;
 
     @Override
     public SearchBasedAgentState execute(SearchBasedAgentState s) 
@@ -29,13 +33,11 @@ public class Kill extends SearchAction
         String crew = agentState.getCurrentRoom().getCrewPresent().stream().findAny().get();
         
         agentState.addCrewKilled(crew);
-             
-        agentState.getCurrentRoom().deleteCrew(crew);
-     
-        agentState.getAliveCrew().remove(crew);
-        
+                          
         //Utils.energyPostCondition(agentState, ENERGY_COST);
         
+        agentState.setDecisionCost(agentState.getDecisionCost() + DECISION_COST);
+               
         return agentState;
         
     }

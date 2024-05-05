@@ -41,7 +41,7 @@ public class CrewMemberState {
         return currentRoom;
     }
 
-    public Boolean getIsAlive() {
+    public Boolean isAlive() {
         return isAlive;
     }
 

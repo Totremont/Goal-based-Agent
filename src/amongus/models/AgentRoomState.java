@@ -25,7 +25,6 @@ public class AgentRoomState
         this.name = name;
         this.neighbors.addAll(neighbors);
         this.lastSeen = lastSeen;
-        this.crewPresent.clear();
         this.crewPresent.addAll(crewPresent);
         this.sabotage = sabotage;
     }

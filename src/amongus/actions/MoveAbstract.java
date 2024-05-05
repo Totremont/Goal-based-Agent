@@ -18,6 +18,9 @@ public abstract class MoveAbstract extends SearchAction
 {  
     protected final Long ENERGY_COST = 1l;
     
+    //Decision cost marca que tan favorable es una acción | Se utiliza en costo uniforme
+    protected final Long DECISION_COST = 5l;
+    
     /*
         En el arbol de búsqueda, las acciones no consumen energía.
     */
@@ -49,12 +52,13 @@ public abstract class MoveAbstract extends SearchAction
             
         }
         
-        //System.out.println("Me moví a: " + nextRoom);
-        
-        agentState.setCurrentRoom(nextRoomState);       
+        agentState.setPreviousRoom(agentState.getCurrentRoom());
+        agentState.setCurrentRoom(nextRoomState);   
         
         //Utils.energyPostCondition(agentState, ENERGY_COST);
-               
+        
+        agentState.setDecisionCost(agentState.getDecisionCost() + DECISION_COST);
+                     
         
         return agentState;
         

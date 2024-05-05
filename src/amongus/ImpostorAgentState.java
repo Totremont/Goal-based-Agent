@@ -31,25 +31,29 @@ public class ImpostorAgentState extends SearchBasedAgentState
     
     private Long gameTime;
     private Long energy;
+    
+    /*
+        DecisionCost -> Marca el 'costo' de todas las decisiones que se han tomado.
+        NO es igual al costo de energía. Esto se usa en costo uniforme para parametrizar qué tan ideal es la situación actual
+        Es cambiado por las acciones del agente.
+    */
+    private Long decisionCost;
     private boolean sensorAvailable;
     
     //Cuando se crea el primer estado se inicializa con información estática
-    public ImpostorAgentState(HashMap<String,AgentRoomState> gameRooms, HashMap<String, Pair<String,Long>> gameCrew, List<String> sabotages)
+    public ImpostorAgentState(HashMap<String,AgentRoomState> gameRooms, HashMap<String, Pair<String,Long>> gameCrew, 
+            List<String> sabotages)
     {
         this.knownRooms.putAll(gameRooms);
         this.aliveCrew.putAll(gameCrew); 
         this.requiredSabotages.addAll(sabotages);
-        /*
-        this.aliveCrew.forEach((key,val) -> 
-        {
-            this.knownRooms.get(val.getFirst()).addCrew(key);
-        });
-        */
+        this.decisionCost = 0l;
+       
     }
     
     
     @Override
-    public SearchBasedAgentState clone() 
+    public ImpostorAgentState clone() 
     {
         var knownRoomsClone = Utils.copyAgentRooms(this.knownRooms);
         var aliveCrewClone = Utils.copyAgentAliveCrew(this.aliveCrew);
@@ -66,7 +70,8 @@ public class ImpostorAgentState extends SearchBasedAgentState
         newAgent.setGameTime(this.gameTime);
         newAgent.setEnergy(this.energy);
         newAgent.setSensorAvailable(this.sensorAvailable);
-        
+        newAgent.setDecisionCost(this.decisionCost);
+                     
         return newAgent;          
     }
     
@@ -87,15 +92,16 @@ public class ImpostorAgentState extends SearchBasedAgentState
         (
                 other.getCurrentRoom().equals(this.currentRoom)
                 //Si la previous room es null en las 2 o igual.
-                && previousRoomEquality
+                //&& previousRoomEquality
                 && other.getKnownRooms().equals(this.knownRooms)
-                && other.getCrewKilled().equals(this.crewKilled)
-                && other.getAliveCrew().equals(this.aliveCrew)
-                && other.getRequiredSabotages().equals(this.requiredSabotages)
+                //&& other.getCrewKilled().equals(this.crewKilled)
+                //&& other.getAliveCrew().equals(this.aliveCrew)
+                //&& other.getRequiredSabotages().equals(this.requiredSabotages)
                 && other.getDoneSabotages().equals(this.doneSabotages)
-                && other.getGameTime().equals(this.gameTime)
-                && other.getEnergy().equals(this.energy)
-                && other.isSensorAvailable() == this.sensorAvailable
+                //&& other.getGameTime().equals(this.gameTime)
+                //&& other.getEnergy().equals(this.energy)
+                //&& other.isSensorAvailable() == this.sensorAvailable
+                //&& other.getDecisionCost().equals(this.decisionCost)
         );
         
         return result;
@@ -106,7 +112,6 @@ public class ImpostorAgentState extends SearchBasedAgentState
     @Override
     public void updateState(Perception p) 
     {
-        //System.out.println("Actualizando estado--");
         ImpostorAgentPerc agentPerc = (ImpostorAgentPerc) p;
         AgentRoomState roomState = this.knownRooms.get(agentPerc.getCurrentRoomSensor());
         
@@ -130,8 +135,11 @@ public class ImpostorAgentState extends SearchBasedAgentState
             //roomState.setCrewPresent(agentPerc.getCrewPresentSensor());
             roomState.setLastSeen(agentPerc.getGameTime());
             
-            this.previousRoom = this.currentRoom;
-            this.currentRoom = roomState;
+            if(this.currentRoom == null || !agentPerc.getCurrentRoomSensor().equals(this.currentRoom.getName()))
+            {
+                this.previousRoom = this.currentRoom;
+                this.currentRoom = roomState;
+            }
             
         }
         
@@ -157,7 +165,10 @@ public class ImpostorAgentState extends SearchBasedAgentState
                 }
                 
                 //Actualizar lista
-                this.aliveCrew.put(it.getFirst(),new Pair(newRoomName,agentPerc.getGameTime()));
+                Pair pair = this.aliveCrew.get(it.getFirst());
+                pair.setFirst(newRoomName);
+                pair.setSecond(gameTime); 
+                this.aliveCrew.put(it.getFirst(),pair);
                 
             });
         }
@@ -167,6 +178,8 @@ public class ImpostorAgentState extends SearchBasedAgentState
         this.energy = agentPerc.getEnergySensor();
         
         this.sensorAvailable = agentPerc.isExtraSensorAvail();
+        
+        
     }
     
     /*
@@ -207,7 +220,10 @@ public class ImpostorAgentState extends SearchBasedAgentState
             Long index = Utils.randomBetween.apply(availRooms.size() - 1, 0);
             AgentRoomState newRoom = this.knownRooms.get(availRooms.get(index.intValue()));
             newRoom.addCrew(it);
-            this.aliveCrew.put(it,new Pair(newRoom.getName(),gameTime));
+            Pair pair = this.aliveCrew.get(it);
+            pair.setFirst(newRoom.getName());
+            pair.setSecond(gameTime);
+            this.aliveCrew.put(it,pair);
         });
     }
     
@@ -240,7 +256,8 @@ public class ImpostorAgentState extends SearchBasedAgentState
     public void addCrewKilled(String name)
     {
         this.crewKilled.add(name);
-        //System.out.println("Maté a uno!");
+        this.aliveCrew.remove(name);
+        this.currentRoom.deleteCrew(name);
     }
     
     //Setters para clonar
@@ -252,16 +269,21 @@ public class ImpostorAgentState extends SearchBasedAgentState
     
     public void setCrewKilled(List<String> crew)
     {
-        this.crewKilled.clear();
+        //this.crewKilled.clear();
         this.crewKilled.addAll(crew);
     }
     
     public void setDoneSabotages(List<String> sab)
     {
-        this.doneSabotages.clear();
+        //this.doneSabotages.clear();
         this.doneSabotages.addAll(sab);
     }
 
+    public void setDecisionCost(Long decisionCost) {
+        this.decisionCost = decisionCost;
+    }
+    
+    
     //--Getters
 
     public AgentRoomState getCurrentRoom() {
@@ -303,6 +325,12 @@ public class ImpostorAgentState extends SearchBasedAgentState
     public List<String> getDoneSabotages() {
         return doneSabotages;
     }
+
+    public Long getDecisionCost() {
+        return decisionCost;
+    }
+    
+    
  
     
     @Override
@@ -315,7 +343,6 @@ public class ImpostorAgentState extends SearchBasedAgentState
     public String toString() 
     {
         StringBuilder text = new StringBuilder("--Estado | Tiempo: ").append(this.getGameTime()).append("--\n");
-        text.append("Sabotajes restantes: ").append(this.requiredSabotages.size()).append("\n");
         text.append("Me encuentro en: ").append(this.currentRoom.getName()).append("\n");
         text.append("Vengo de: ").append(this.previousRoom != null ? this.previousRoom.getName() : "Empecé acá").append("\n");
         text.append("Tripulantes presentes: ").append(this.currentRoom.getCrewPresent().size()).append("\n");
@@ -323,7 +350,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
         text.append("Puedo sabotear?: ")
                 .append(this.currentRoom.isSabotable() ? "SI" : "NO").append("\n");
         text.append("Sabotajes hechos: ").append(this.doneSabotages.size()).append("\n");
-        text.append("Sabotajes restantes: ").append(this.requiredSabotages.size()).append("\n");
+        text.append("Sabotajes totales: ").append(this.requiredSabotages.size()).append("\n");
         text.append("Mi energía restante: ").append(this.getEnergy()).append("\n");
         text.append("Tengo capacidad extrasensorial? : ")
                 .append(this.isSensorAvailable() ? "SI\n" : "NO\n").append("\n");
