@@ -14,8 +14,9 @@ import java.util.List;
 
 public class WorldAction 
 {
-    public GameState advanceGame(GameState gameState)
+    public static GameState advanceGame(GameState gameState)
     {
+        System.out.println("==Juego avanza==");
         List<CrewMemberState> crewStates = gameState.getCrewStates();
         
         //Avanzamos tiempo de juego porque esta nueva información pertenece al siguiente ciclo.
@@ -41,10 +42,13 @@ public class WorldAction
             if(shouldMove)
             {   
                 //Obtenemos nueva habitación para el tripulante
-                Room newRoom = it.getCurrentRoom().getNeighbors().stream().filter(neigh -> neigh != null).findAny().get();
-                it.getCurrentRoom().getState().deleteMember(it.getCrew());
-                it.setCurrentRoom(newRoom);
-                it.setLastMoveTime(gameState.getGameTime());
+                List<Room> availableRooms = it.getCurrentRoom().getNeighbors().stream().filter(neigh -> neigh != null).toList();
+                
+                Long index = Utils.randomBetween.apply(availableRooms.size() - 1,0);
+                
+                Room newRoom = availableRooms.get(index.intValue());
+                
+                gameState.setCrewRoom(it.getCrew().getName(), newRoom.getName());
             }
         });
         

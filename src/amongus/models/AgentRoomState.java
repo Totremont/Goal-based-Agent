@@ -10,7 +10,7 @@ import java.util.List;
 public class AgentRoomState
 {
     private String name;
-    private final List<String> neighbors = new ArrayList<>();     //[O,N,E,S]
+    private final ArrayList<String> neighbors = new ArrayList<>(5);
 
     //Última vez visitado
     private Long lastSeen;
@@ -25,41 +25,38 @@ public class AgentRoomState
         this.name = name;
         this.neighbors.addAll(neighbors);
         this.lastSeen = lastSeen;
+        this.crewPresent.clear();
         this.crewPresent.addAll(crewPresent);
         this.sabotage = sabotage;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public List<String> getNeighbors() {
-        return neighbors;
-    }
-
-    public Long getLastSeen() {
-        return lastSeen;
-    }
-
-    public List<String> getCrewPresent() {
-        return crewPresent;
-    }
-
-    public void deleteCrew(String name)
+    @Override
+    public AgentRoomState clone() 
     {
-        this.crewPresent.remove(name);
+        List<String> crew = ((List<String>)this.crewPresent.clone());
+        List<String> neigh = ((List<String>)this.neighbors.clone());
+        return new AgentRoomState(this.name,neigh,this.lastSeen,crew,this.sabotage);
     }
 
-    public boolean isSabotable()
+    @Override
+    public boolean equals(Object obj) 
     {
-        return this.sabotage != null;
+        if(!(obj instanceof AgentRoomState)) return false;
+        
+        var other = (AgentRoomState) obj;
+        
+        return 
+        (
+                other.getName().equals(this.name) 
+                && other.getNeighbors().equals(this.neighbors)
+                && other.getLastSeen().equals(this.lastSeen)
+                && other.getCrewPresent().equals(this.crewPresent)
+                && other.isSabotable() == this.isSabotable()
+        );
     }
-
-    public String getSabotage()
-    {
-        return this.sabotage;
-    }
-
+    
+    //--Setter
+    
     public void setSabotage(String name)
     {
         this.sabotage = name;
@@ -75,5 +72,41 @@ public class AgentRoomState
 
     public void setCrewPresent(List<String> crewPresent) {
         this.crewPresent.addAll(crewPresent);
+    }
+    
+    public void addCrew(String name)
+    {
+        this.crewPresent.add(name);
+    }
+    
+    public void deleteCrew(String name)
+    {
+        this.crewPresent.remove(name);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<String> getNeighbors() {
+        return neighbors;
+    }
+
+    public Long getLastSeen() {
+        return lastSeen;
+    }
+
+    public ArrayList<String> getCrewPresent() {
+        return crewPresent;
+    }
+
+    public boolean isSabotable()
+    {
+        return this.sabotage != null;
+    }
+
+    public String getSabotage()
+    {
+        return this.sabotage;
     }
 }

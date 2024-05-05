@@ -74,6 +74,7 @@ public class GameState extends EnvironmentState
         this.agentRoom.getState().setAgentPresent(true);
         this.agentEnergy = agentEnergy;
         this.agentSensorAvail = agentExtraSensor;
+        this.agentSensorLastTime = 0l;
         
         //Distribuir tripulantes en el mapa
         for(int i = 0; i < totalCrew; i++)
@@ -124,6 +125,7 @@ public class GameState extends EnvironmentState
         Room newRoom = this.map.get(roomName);
         crew.getState().getCurrentRoom().getState().deleteMember(crew);
         crew.getState().setCurrentRoom(newRoom);
+        newRoom.getState().addMember(crew);
     }
     
     public void removeSabotage(String name) //Cuando se completa un sabotaje
@@ -215,7 +217,20 @@ public class GameState extends EnvironmentState
     @Override
     public String toString() 
     {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        StringBuilder text = new StringBuilder("--Mundo | Tiempo: ").append(this.gameTime).append("--\n");
+        text.append("¿Dónde está cada tripulante?: \n");
+        this.crewStates.forEach(state -> 
+        {
+            text
+                    .append("Me llamo: ")
+                    .append(state.getCrew().getName())
+                    .append(" y estoy en: ")
+                    .append(state.getCurrentRoom().getName())
+                    .append("\n");
+        });
+        
+        return text.toString();
+        
     }
     
     

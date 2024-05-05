@@ -14,13 +14,17 @@ public class Room
     private final RoomType type;
     
     private Sabotage sabotage = null;
-    private List<Room> neighbors = new ArrayList<>(5);  //[O,N,E,S,T]
+    private final List<Room> neighbors = new ArrayList<>();
     private RoomState state;
 
     public Room(String name, RoomType type) 
     {
         this.name = name;
         this.type = type;
+        for (int i = 0; i < 5; i++) 
+        {
+            this.neighbors.add(null);    //Creamos las posiciones [O,N,E,S,T]
+        }
     }
 
     public void setState(RoomState state) {
@@ -45,12 +49,8 @@ public class Room
     //Añade un nuevo vecino y le notifico al mismo que me añada a mi
     public void addNeighbor(Room room, Cardinal cardinal)
     {
-        if(!room.equals(neighbors.get(cardinal.ordinal()))) //todo - No hay logica de reemplazo de vecino
-        {
-            this.neighbors.add(cardinal.ordinal(), room);
-            room.addMe(this, opposite(cardinal));
-        }
-        else System.out.printf("El vecino %s ya existe en %s en dirección %s",room.getName(), this.getName(), cardinal);
+        this.neighbors.set(cardinal.ordinal(), room);
+        room.addMe(this, opposite(cardinal));
     }
     
     //Cuando un vecino me pide a mi que lo añada
@@ -58,7 +58,7 @@ public class Room
     {
         if(!this.neighbors.contains(room))
         {
-            this.neighbors.add(room);
+            this.neighbors.set(cardinal.ordinal(), room);
         }
         else System.out.printf("El vecino %s ya existe en %s",room.getName(), this.getName());
     }
