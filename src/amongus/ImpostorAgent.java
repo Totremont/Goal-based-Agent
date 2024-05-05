@@ -16,7 +16,9 @@ import frsf.cidisi.faia.agent.search.SearchAction;
 import frsf.cidisi.faia.agent.search.SearchBasedAgent;
 import frsf.cidisi.faia.solver.search.BreathFirstSearch;
 import frsf.cidisi.faia.solver.search.DepthFirstSearch;
+import frsf.cidisi.faia.solver.search.IStepCostFunction;
 import frsf.cidisi.faia.solver.search.Search;
+import frsf.cidisi.faia.solver.search.UniformCostSearch;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
@@ -27,7 +29,8 @@ public class ImpostorAgent extends SearchBasedAgent
     private final GameGoal myGoal;
     private final Vector<SearchAction> myActions = new Vector<>();
     
-    public ImpostorAgent(HashMap<String,AgentRoomState> gameRooms, HashMap<String, Pair<String,Long>> gameCrew, List<String> sabotages, GameGoal goal)
+    public ImpostorAgent(HashMap<String,AgentRoomState> gameRooms, HashMap<String, Pair<String,Long>> gameCrew, 
+            List<String> sabotages, GameGoal goal)
     {
         //Mi estado
         this.myState = new ImpostorAgentState(gameRooms,gameCrew,sabotages);
@@ -54,9 +57,13 @@ public class ImpostorAgent extends SearchBasedAgent
     public Action selectAction()
     {
         // Create the search strategy
-        DepthFirstSearch strategy = new DepthFirstSearch();
+        //DepthFirstSearch strategy = new DepthFirstSearch();
         //BreathFirstSearch strategy = new BreathFirstSearch();
-        // Create a Search object with the strategy
+        
+        //Uniform Cost:
+        IStepCostFunction costFunction = new ActionCost();
+        UniformCostSearch strategy = new UniformCostSearch(costFunction);
+
         Search searchSolver = new Search(strategy);
 
         /* Generate an XML file with the search tree. It can also be generated

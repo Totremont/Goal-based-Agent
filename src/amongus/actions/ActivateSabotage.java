@@ -15,6 +15,10 @@ public class ActivateSabotage extends SearchAction
 {
     
     public final Long ENERGY_COST = 1l;
+    
+    //Decision cost marca que tan favorable es una acción | Se utiliza en costo uniforme
+    //Menor coste == Mejor decisión
+    protected final Long DECISION_COST = 2l;
 
     @Override
     public SearchBasedAgentState execute(SearchBasedAgentState s) 
@@ -35,6 +39,8 @@ public class ActivateSabotage extends SearchAction
         
         //Utils.energyPostCondition(agentState, ENERGY_COST);
         
+        agentState.setDecisionCost(agentState.getDecisionCost() + DECISION_COST);
+   
         return agentState;
         
     }

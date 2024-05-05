@@ -225,8 +225,9 @@ public class GameState extends EnvironmentState
                     .append("Me llamo: ")
                     .append(state.getCrew().getName())
                     .append(" y estoy en: ")
-                    .append(state.getCurrentRoom().getName())
-                    .append("\n");
+                    .append(state.getCurrentRoom().getName());
+                    if(!state.isAlive()) text.append(" <-- MUERTO");
+                    text.append("\n");
         });
         
         return text.toString();

@@ -14,6 +14,11 @@ public class Amongus
         
         simulator.start();
         
+        System.out.println("--Último estado--");
+        System.out.println(game.getEnvironmentState().toString());
+        System.out.println(game.getAgent().getAgentState().toString());
+        
+        
     }
     
 }
