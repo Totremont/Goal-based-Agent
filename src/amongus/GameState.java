@@ -28,11 +28,10 @@ public class GameState extends EnvironmentState
     //Atributos del agente
     private Room agentRoom;
     private Long agentEnergy;
-    private boolean agentSensorAvail; 
+    //private boolean agentSensorAvail; 
     private Long agentSensorLastTime; //Cuando estuvo activo por última vez
     
     //Se activa cuando el juego debe darle información extrasensorial al agente (en la sgte percepción)
-    //Sucede si el agente acciona su sensor
     private boolean omniscientAgent;
 
     public GameState(Game environment) 
@@ -73,7 +72,7 @@ public class GameState extends EnvironmentState
         this.agentRoom = map.get(agentRoomName);
         this.agentRoom.getState().setAgentPresent(true);
         this.agentEnergy = agentEnergy;
-        this.agentSensorAvail = agentExtraSensor;
+        this.omniscientAgent = agentExtraSensor;
         this.agentSensorLastTime = 0l;
         
         //Distribuir tripulantes en el mapa
@@ -133,10 +132,12 @@ public class GameState extends EnvironmentState
         this.sabotages.get(name).getRoom().getState().setIsSabotable(false);
     }
 
+    /* Unused 
     public void setAgentSensorAvail(boolean agentSensorAvail) 
     {    
         this.agentSensorAvail = agentSensorAvail;
     }
+    */
 
     public void setGameTime(Long gameTime) 
     {
@@ -152,6 +153,7 @@ public class GameState extends EnvironmentState
     {
         this.omniscientAgent = omniscientAgent;
     }
+    
      
     // -- Getters
     public HashMap<String, Room> getMap() 
@@ -194,10 +196,12 @@ public class GameState extends EnvironmentState
         return agentSensorLastTime;
     }
 
+    /*
     public boolean isAgentSensorAvail() 
     {
         return agentSensorAvail;
     }
+    */
 
     public Long getGameTime() 
     {

@@ -10,7 +10,7 @@ import frsf.cidisi.faia.agent.search.SearchBasedAgentState;
 import frsf.cidisi.faia.state.AgentState;
 import frsf.cidisi.faia.state.EnvironmentState;
 
-//Activar sensor extrasensorial | No se puede utilizar como acción usando árboles. El juego se lo entrega automáticamente.
+//Activar sensor extrasensorial | UNUSED -> No se puede utilizar como acción usando árboles. El juego se lo entrega automáticamente.
 
 public class ActivateSensor extends SearchAction 
 {

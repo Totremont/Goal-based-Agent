@@ -52,7 +52,7 @@ public class WorldAction
             }
         });
         
-        if(!gameState.isAgentSensorAvail())
+        if(!gameState.isOmniscientAgent())  
         {
             //Comprobar si se debe habilitar el sensor
             int currentTime = gameState.getGameTime().intValue();
@@ -70,12 +70,12 @@ public class WorldAction
             
             if(shouldActivate)
             {   
-                gameState.setAgentSensorAvail(true);
+                //gameState.setAgentSensorAvail(true);
                 gameState.setAgentSensorLastTime(gameState.getGameTime());
                 gameState.setOmniscientAgent(true);     //Se lo activa automáticamente
             }
         } 
-        else gameState.setAgentSensorAvail(false);  //Sacarselo en la siguiente percepción
+        else gameState.setOmniscientAgent(false);  //Sacarselo en la siguiente percepción
         
         return gameState;
         
