@@ -118,13 +118,14 @@ public class GameState extends EnvironmentState
         crew.getState().getCurrentRoom().getState().deleteMember(crew);
     }
     
-    public void setCrewRoom(String crewName, String roomName)
+    public void setCrewRoom(String crewName, String roomName, Long gameTime)
     {
         CrewMember crew = this.crews.get(crewName);
         Room newRoom = this.map.get(roomName);
         crew.getState().getCurrentRoom().getState().deleteMember(crew);
         crew.getState().setCurrentRoom(newRoom);
         newRoom.getState().addMember(crew);
+        crew.getState().setLastMoveTime(gameTime);
     }
     
     public void removeSabotage(String name) //Cuando se completa un sabotaje

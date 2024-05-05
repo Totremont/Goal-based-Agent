@@ -26,18 +26,20 @@ public class WorldAction
         crewStates.stream().filter(it -> it.isAlive()).forEach(it -> 
         {
             
-            int currentTime = gameState.getGameTime().intValue();
+            Long currentTime = gameState.getGameTime();
             
             //Tiempo a esperar antes de poder moverse
             int nextMoveWait = it.getLastMoveTime().intValue() + gameState.getEnvironment().MIN_CREW_STEP_TIME;
             
-            //Tiempo máximo para moverse | Se suma + 1 porque si no le falta 1 ciclo.
-            int nextMoveTime = it.getLastMoveTime().intValue() + gameState.getEnvironment().MAX_CREW_STEP_TIME + 1;
+            //Tiempo máximo para moverse
+            int nextMoveTime = it.getLastMoveTime().intValue() + gameState.getEnvironment().MAX_CREW_STEP_TIME;
             
             //Ya pasó el tiempo mínimo?
-            int diff = currentTime - nextMoveWait;
+            Long minDiff = currentTime - nextMoveWait;
             
-            boolean shouldMove = diff > 0 && Utils.randomBetween.apply(nextMoveTime - currentTime,0) == 0;
+            Long maxDiff = nextMoveTime - currentTime;
+            
+            boolean shouldMove = minDiff >= 0 && Utils.randomBetween.apply(maxDiff.intValue(),0) == 0l;
             
             if(shouldMove)
             {   
@@ -48,7 +50,8 @@ public class WorldAction
                 
                 Room newRoom = availableRooms.get(index.intValue());
                 
-                gameState.setCrewRoom(it.getCrew().getName(), newRoom.getName());
+                gameState.setCrewRoom(it.getCrew().getName(), newRoom.getName(),currentTime);
+                
             }
         });
         
@@ -66,7 +69,7 @@ public class WorldAction
             //Ya pasó el tiempo mínimo?
             int diff = currentTime - nextMoveWait;
             
-            boolean shouldActivate = diff > 0 && Utils.randomBetween.apply(nextMoveTime - currentTime,0) == 0;
+            boolean shouldActivate = diff > 0 && Utils.randomBetween.apply(nextMoveTime - currentTime,0) == 0l;
             
             if(shouldActivate)
             {   
