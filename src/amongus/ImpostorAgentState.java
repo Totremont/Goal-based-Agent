@@ -23,7 +23,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
     
     private final ArrayList<String> crewKilled = new ArrayList<>();
     
-    //Nombre del tripulante vivo / última ubicación conocida - tiempo de avistamiento
+    //Nombre del tripulante vivo / última ubicación conocida - tiempo de avistamiento (unused actualmente)
     private final HashMap<String, Pair<String,Long>> aliveCrew = new HashMap<>();
     
     private final ArrayList<String> requiredSabotages = new ArrayList<>();
@@ -75,6 +75,10 @@ public class ImpostorAgentState extends SearchBasedAgentState
         return newAgent;          
     }
     
+    /* 
+        Si se restringuen las condiciones de equality, hay más opciones, pero el arbol es más grande.
+        Si se relajan, el árbol es menor, pero hay menos opciones.
+    */
     @Override
     public boolean equals(Object obj)   //Las listas y mapas comparan sus valores con los equals de sus atributos
     {
@@ -82,16 +86,16 @@ public class ImpostorAgentState extends SearchBasedAgentState
         
         ImpostorAgentState other = (ImpostorAgentState) obj;
         
+        /*  
         boolean previousRoomEquality = other.getPreviousRoom() == null && this.previousRoom == null;
         if(other.getPreviousRoom() != null && this.previousRoom != null && other.getPreviousRoom().equals(this.previousRoom))
         {
             previousRoomEquality = true;
-        }
+        }*/
         
         boolean result =
         (
                 other.getCurrentRoom().equals(this.currentRoom)
-                //Si la previous room es null en las 2 o igual.
                 //&& previousRoomEquality
                 && other.getKnownRooms().equals(this.knownRooms)
                 //&& other.getCrewKilled().equals(this.crewKilled)
@@ -144,7 +148,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
         }
         
         //Actualizamos estado de agentes vistos en esta habitación
-        updateCrewLocation(roomState, agentPerc.getCrewPresentSensor(), agentPerc.getGameTime());
+        updatePresentCrewLocation(roomState, agentPerc.getCrewPresentSensor(), agentPerc.getGameTime());
         
         //Si tengo información extrasensorial, ubico a todos los tripulantes
         if(agentPerc.isExtraInfoAvail())
@@ -177,7 +181,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
         
         this.energy = agentPerc.getEnergySensor();
         
-        this.sensorAvailable = agentPerc.isExtraSensorAvail();
+        this.sensorAvailable = agentPerc.isExtraInfoAvail();
         
         
     }
@@ -190,7 +194,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
     
     */
     
-    private void updateCrewLocation(AgentRoomState currentRoom, List<String> newCrew, Long gameTime)
+    private void updatePresentCrewLocation(AgentRoomState currentRoom, List<String> newCrew, Long gameTime)
     {
         //Pedimos los tripulantes que conocíamos antes
         List<String> oldCrew = (List<String>) currentRoom.getCrewPresent().clone();

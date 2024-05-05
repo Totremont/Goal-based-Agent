@@ -37,12 +37,12 @@ public class ImpostorAgent extends SearchBasedAgent
         this.setAgentState(myState);
         
         //Mis acciones
+        myActions.add(new Kill());
+        myActions.add(new ActivateSabotage());
         myActions.add(new MoveNorth());
         myActions.add(new MoveEast());
         myActions.add(new MoveSouth());
         myActions.add(new MoveWest());
-        myActions.add(new Kill());
-        myActions.add(new ActivateSabotage());
 
         //Mi objectivo
         this.myGoal = goal;
@@ -61,8 +61,10 @@ public class ImpostorAgent extends SearchBasedAgent
         //BreathFirstSearch strategy = new BreathFirstSearch();
         
         //Uniform Cost:
-        IStepCostFunction costFunction = new ActionCost();
+        IStepCostFunction costFunction = new AgentStateCost();
         UniformCostSearch strategy = new UniformCostSearch(costFunction);
+        
+        System.out.println("Resolviendo con costo uniforme");
 
         Search searchSolver = new Search(strategy);
 

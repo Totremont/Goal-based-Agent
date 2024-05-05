@@ -12,24 +12,26 @@ import java.util.List;
 //Como ve el mundo nuestro agente
 public class ImpostorAgentPerc extends Perception 
 {
-    private String currentRoomSensor;
-    private List<String> cardinalSensor = new ArrayList<>(5);    //[O,N,E,S]
-    private List<String> crewPresentSensor = new ArrayList<>();
-    private Long energySensor;
-    private String sabotageSensor;
-    private Long gameTimeSensor;
-    private boolean extraSensorAvail;
+    private final String currentRoomSensor;
+    private final List<String> cardinalSensor = new ArrayList<>(5);    //[O,N,E,S]
+    private final List<String> crewPresentSensor = new ArrayList<>();
+    private final Long energySensor;
+    private final String sabotageSensor;
+    private final Long gameTimeSensor;
+    //private boolean extraSensorAvail; unused
+    
+    //Hay información extrasensorial?
+    private boolean extraInfoAvail;
     
     //Lista de pares entre un tripulante y su ubicación (extrasensorial).
-    private List<Pair<String,String>> extraSensor = new ArrayList<>();
-    private boolean extraInfoAvail;
+    private final List<Pair<String,String>> extraSensor = new ArrayList<>();
     
     
     public ImpostorAgentPerc     //Constructor normal
     (
         String currentRoom, Long energy, List<String> neighbors, 
-        List<String> crewPresent, String sabotage, Long gameTime, boolean extraSensorAvail
-    ) 
+        List<String> crewPresent, String sabotage, Long gameTime )//,boolean extraSensorAvail
+     
     {
         this.currentRoomSensor = currentRoom;
         this.energySensor = energy;
@@ -37,10 +39,10 @@ public class ImpostorAgentPerc extends Perception
         this.crewPresentSensor.addAll(crewPresent);
         this.sabotageSensor = sabotage;
         this.gameTimeSensor = gameTime;
-        this.extraSensorAvail = extraSensorAvail;
+        //this.extraSensorAvail = extraSensorAvail;
         this.extraInfoAvail = false;
     }
-        
+     /*   
     public ImpostorAgentPerc    //Constructor especial extrasensorial
     (
         String currentRoom, Long energy, List<String> neighbors, 
@@ -54,7 +56,20 @@ public class ImpostorAgentPerc extends Perception
         this.extraSensor.addAll(extraSensor);
         this.extraInfoAvail = true;
     }
+*/
+    
+    //Setters extrasensoriales
 
+    public void setExtraInfoAvail(boolean extraInfoAvail) {
+        this.extraInfoAvail = extraInfoAvail;
+    }
+
+    public void addExtraCrewLocation(Pair<String, String> location) {
+        this.extraSensor.add(location);
+    }
+    
+    //Getters--
+    
     public String getCurrentRoomSensor() {
         return currentRoomSensor;
     }
@@ -79,9 +94,11 @@ public class ImpostorAgentPerc extends Perception
         return gameTimeSensor;
     }
 
+    /*
     public boolean isExtraSensorAvail() {
         return extraSensorAvail;
     }
+    */
     
     public boolean isExtraInfoAvail() {
         return extraInfoAvail;
@@ -90,8 +107,6 @@ public class ImpostorAgentPerc extends Perception
     public List<Pair<String, String>> getExtraSensor() {
         return extraSensor;
     }
-    
-    
     
     @Override   //Innecesario puesto que el juego crea e inicializa las percepciones.
     public void initPerception(Agent agent, Environment environment) {}

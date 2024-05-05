@@ -11,6 +11,7 @@ import amongus.utils.Pair;
 import amongus.utils.Utils;
 import frsf.cidisi.faia.agent.Action;
 import frsf.cidisi.faia.agent.Perception;
+import frsf.cidisi.faia.agent.search.SearchBasedAgent;
 import frsf.cidisi.faia.environment.Environment;
 import frsf.cidisi.faia.state.EnvironmentState;
 import java.util.ArrayList;
@@ -24,24 +25,23 @@ public class Game extends Environment
     public final HashMap<String, Sabotage> sabotages = new HashMap<>();
     
     private final ImpostorAgent agent;
+    private final GameState state;
+    private final GameGoal goal;
 
     // -- Parámetros de juego
     public int MAX_ENERGY = 150;
     public int MIN_ENERGY = 30;
-    public int MAX_CREW = 6;       //Se banca hasta 6 confirmado | Más de 6 dudoso
-    public int MIN_CREW = 5;
+    public int MAX_CREW = 6;       //Con Costo uniforme: Hasta 6 | Con profundidad: Muchos más (Pero necesita potencialmente mucha energía)
+    public int MIN_CREW = 4;
     public int MAX_CREW_STEP_TIME = 3;
     public int MIN_CREW_STEP_TIME = 1;
     public int MAX_AGENT_SENSOR_STEP_TIME = 5;
     public int MIN_AGENT_SENSOR_STEP_TIME = 3;
-    
-    private final GameState state;
-    private final GameGoal goal;
 
     //Constructor con valores por defecto
     public Game()
     {
-        this(150,30,6,5,3,1,5,3);
+        this(150,30,6,4,3,1,5,3);
     }
     
     //Constructor de juego
@@ -50,7 +50,7 @@ public class Game extends Environment
         //--Creación de juego--
         super();
         MAX_ENERGY = maxEnergy;
-        MIN_CREW = minCrew;
+        MIN_ENERGY = minEnergy;
         MAX_CREW = maxCrew;
         MIN_CREW = minCrew;
         MAX_CREW_STEP_TIME = maxCrewStep;
@@ -68,38 +68,8 @@ public class Game extends Environment
         //Setear objetivo
         this.goal = new GameGoal(this.state);
         
-        //--Creación del agente--
-        
-        //Mapeamos información de juego a tipo que entiende el agente.
-        List<String> roomNames = new ArrayList<>();
-        HashMap<String,AgentRoomState> gameRooms = new HashMap<>();
-        this.map.forEach((key,val) -> 
-        {
-            roomNames.add(key);
-            List<String> neighbors = val.getNeighbors().stream().map(it -> it != null ? it.getName() : null).toList();
-            String sabotage = val.getSabotage() != null ? val.getSabotage().getName() : null;
-            var roomState = new AgentRoomState(val.getName(),neighbors,-1l,new ArrayList<>(),sabotage);
-            gameRooms.put(key,roomState);
-        });
-        
-        //Mapear tripulantes y, como el agente no sabe donde están, distribuirlos aleatoriamente.
-        HashMap<String,Pair<String,Long>> gameCrew = new HashMap<>();
-        this.state.getCrews().forEach((key,crew) -> 
-        {
-           String randomRoom = roomNames.get(Utils.randomBetween.apply(map.size() - 1,0).intValue());
-           gameCrew.put(key, new Pair(randomRoom,0l));
-           gameRooms.get(randomRoom).addCrew(key);
-        });
-        
-        //Mapear sabotages
-        List<String> sabotages = new ArrayList<>();
-        this.sabotages.forEach((key,val) -> 
-        {
-            sabotages.add(key);
-        });
-         
-        //Entregamos información de juego inicial
-        agent = new ImpostorAgent(gameRooms,gameCrew,sabotages,this.goal);
+        //Creamos el agente
+        this.agent = (ImpostorAgent) createAgent();
     }
 
     @Override
@@ -133,32 +103,25 @@ public class Game extends Environment
        
        String sabotage = roomState.isSabotable() ? roomState.getRoom().getSabotage().getName() : null;
        
+       agentPerc = new ImpostorAgentPerc
+        (
+            agentLocation.getName(), state.getAgentEnergy(), 
+            neighbors,crewPresent, sabotage, state.getGameTime()
+        );
+       
        if(state.isOmniscientAgent())    //Darle información extrasensorial
        {
-           List<Pair<String,String>> crewLocations = new ArrayList<>();
-           crewLocations.addAll(this.state.getCrewStates().stream().filter(it -> it.isAlive()).map
-            (
-                state -> {return new Pair<>(state.getCrew().getName(),state.getCurrentRoom().getName());}
-            ).toList());
+           agentPerc.setExtraInfoAvail(true);
            
-           agentPerc = new ImpostorAgentPerc
+           this.state.getCrewStates().stream().filter(it -> it.isAlive()).forEach
             (
-                agentLocation.getName(), state.getAgentEnergy(), 
-                neighbors,crewPresent, sabotage, state.getGameTime(),
-                state.isAgentSensorAvail(), crewLocations
-                   
-            );       
+                state -> 
+                {
+                    agentPerc.addExtraCrewLocation(new Pair<>(state.getCrew().getName(),state.getCurrentRoom().getName()));
+                }
+            );      
        }
-       else     //Información normal
-       {
-          agentPerc = new ImpostorAgentPerc
-            (
-                agentLocation.getName(), state.getAgentEnergy(), 
-                neighbors,crewPresent, sabotage, state.getGameTime(),
-                state.isAgentSensorAvail()
-                   
-            ); 
-       }
+       else agentPerc.setExtraInfoAvail(false);
     
        return agentPerc;
        
@@ -255,6 +218,41 @@ public class Game extends Environment
         map.get("Administración").addNeighbor(map.get("Pasillo central"), Cardinal.OESTE);
         
         
+    }
+    
+    //Crear y darle información estática inicial al agente
+    private SearchBasedAgent createAgent()
+    {
+        //Mapeamos información de juego a tipo que entiende el agente.
+        List<String> roomNames = new ArrayList<>();
+        HashMap<String,AgentRoomState> gameRooms = new HashMap<>();
+        this.map.forEach((key,val) -> 
+        {
+            roomNames.add(key);
+            List<String> neighbors = val.getNeighbors().stream().map(it -> it != null ? it.getName() : null).toList();
+            String sabotage = val.getSabotage() != null ? val.getSabotage().getName() : null;
+            var roomState = new AgentRoomState(val.getName(),neighbors,-1l,new ArrayList<>(),sabotage);
+            gameRooms.put(key,roomState);
+        });
+        
+        //Mapear tripulantes y, como el agente no sabe donde están, distribuirlos aleatoriamente.
+        HashMap<String,Pair<String,Long>> gameCrew = new HashMap<>();
+        this.state.getCrews().forEach((key,crew) -> 
+        {
+           String randomRoom = roomNames.get(Utils.randomBetween.apply(map.size() - 1,0).intValue());
+           gameCrew.put(key, new Pair(randomRoom,0l));
+           gameRooms.get(randomRoom).addCrew(key);
+        });
+        
+        //Mapear sabotages
+        List<String> sabotages = new ArrayList<>();
+        this.sabotages.forEach((key,val) -> 
+        {
+            sabotages.add(key);
+        });
+         
+        //Entregamos información de juego inicial
+        return new ImpostorAgent(gameRooms,gameCrew,sabotages,this.goal);
     }
 
 }
