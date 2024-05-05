@@ -1,6 +1,7 @@
 
 package amongus;
 
+import amongus.models.enums.Cardinal;
 import amongus.utils.Pair;
 import frsf.cidisi.faia.agent.Agent;
 import frsf.cidisi.faia.agent.Perception;
@@ -12,7 +13,7 @@ import java.util.List;
 public class ImpostorAgentPerc extends Perception 
 {
     private String currentRoomSensor;
-    private List<String> cardinalSensor = new ArrayList<>(4);    //[O,N,E,S]
+    private List<String> cardinalSensor = new ArrayList<>(5);    //[O,N,E,S]
     private List<String> crewPresentSensor = new ArrayList<>();
     private Long energySensor;
     private String sabotageSensor;
@@ -49,6 +50,7 @@ public class ImpostorAgentPerc extends Perception
     ) 
     {
         this(currentRoom,energy,neighbors,crewPresent,sabotage,gameTime,extraSensorAvail);
+        //Colocar cada tripulante en su lugar
         this.extraSensor.addAll(extraSensor);
         this.extraInfoAvail = true;
     }
@@ -93,6 +95,25 @@ public class ImpostorAgentPerc extends Perception
     
     @Override   //Innecesario puesto que el juego crea e inicializa las percepciones.
     public void initPerception(Agent agent, Environment environment) {}
+
+    @Override
+    public String toString() 
+    {
+        StringBuilder text = new StringBuilder("--Nueva percepción--\n");
+        text.append("Mi sensor dice que estoy en: ").append(this.currentRoomSensor).append("\n");
+        text.append("Mi sensor dice que los adyacentes son: \n");
+        for(int i = 0; i < this.cardinalSensor.size(); i++)
+        {
+            Cardinal cardinal = Cardinal.values()[i];
+            text.append(cardinal.name()).append(": ").append(this.cardinalSensor.get(i)).append("\n");
+        }
+        text.append("Mi sensor dice hay tripulantes: ").append(this.crewPresentSensor.size()).append("\n");
+        text.append("Recibí información extra-sensorial?: ").append(this.extraInfoAvail ? "SI\n" : "NO\n");
+        text.append("Otra info---\n");
+        return text.toString();
+    }
+    
+    
     
     
     

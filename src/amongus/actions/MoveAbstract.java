@@ -33,33 +33,28 @@ public abstract class MoveAbstract extends SearchAction
     {
         ImpostorAgentState agentState = (ImpostorAgentState) s;
         
-        //if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
+        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
+       
         
         String nextRoom = agentState.getCurrentRoom().getNeighbors().get(this.direction.ordinal());
         
         //Si no hay habitación, abortar
         if(nextRoom == null) return null;
         
-        
         var nextRoomState = agentState.getKnownRooms().get(nextRoom);
         if(nextRoomState == null)   //Si no conozco la habitación a la que me dirijo
         {
-            //Creo un state con información desconocida
-            nextRoomState = new AgentRoomState(nextRoom,null,-1,null,null);
+            //Creo un state con información desconocida | Nota: Esto tirarías excepcion si el agente no conociese el mapa entero de entrada
+            nextRoomState = new AgentRoomState(nextRoom,null,-1,null,null); 
             
-            //agentState.setLastAction(ActionType.MOVE_TO_UNKNOWN);
         }
-        else if(agentState.getPreviousRoom().getName() == nextRoomState.getName())  //Si es la habitación anterior
-        { 
-            //agentState.setLastAction(ActionType.MOVE_TO_PREVIOUS); 
-        } 
-        else //agentState.setLastAction(ActionType.MOVE_TO_KNOWN); //Si es una habitación conocida aleatoria
         
-        agentState.setCurrentRoom(nextRoomState);
+        //System.out.println("Me moví a: " + nextRoom);
         
-        //agentState.setNextAction(true);
+        agentState.setCurrentRoom(nextRoomState);       
         
         //Utils.energyPostCondition(agentState, ENERGY_COST);
+               
         
         return agentState;
         
@@ -75,9 +70,7 @@ public abstract class MoveAbstract extends SearchAction
     public EnvironmentState execute(AgentState ast, EnvironmentState est) 
     {
         var agentState = (ImpostorAgentState) ast;
-        
-        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
-        
+               
         //Modificamos el estado del agente
         if(this.execute(agentState) == null) return null;
         
@@ -89,12 +82,15 @@ public abstract class MoveAbstract extends SearchAction
         gameState.setAgentRoom(agentState.getCurrentRoom().getName());
         gameState.setAgentEnergy(agentState.getEnergy());
         
+        WorldAction.advanceGame(gameState);
+        
         return gameState;       
     }
 
     @Override
-    public String toString() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public String toString() 
+    {
+        return "Me muevo hacia el: " + direction.name();
     }
     
     

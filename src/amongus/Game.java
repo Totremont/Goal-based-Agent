@@ -41,7 +41,7 @@ public class Game extends Environment
     //Constructor con valores por defecto
     public Game()
     {
-        this(150,30,10,7,3,1,5,3);
+        this(150,30,3,2,3,1,5,3);
     }
     
     //Constructor de juego
@@ -63,6 +63,7 @@ public class Game extends Environment
         
         //Setear estado inicial
         this.state = new GameState(this);
+        this.environmentState = this.state;
         
         //Setear objetivo
         this.goal = new GameGoal(this.state);
@@ -75,9 +76,9 @@ public class Game extends Environment
         this.map.forEach((key,val) -> 
         {
             roomNames.add(key);
-            List<String> neighbors = val.getNeighbors().stream().map(it -> it.getName()).toList();
+            List<String> neighbors = val.getNeighbors().stream().map(it -> it != null ? it.getName() : null).toList();
             String sabotage = val.getSabotage() != null ? val.getSabotage().getName() : null;
-            var roomState = new AgentRoomState(val.getName(),neighbors,-1l,null,sabotage);
+            var roomState = new AgentRoomState(val.getName(),neighbors,-1l,new ArrayList<>(),sabotage);
             gameRooms.put(key,roomState);
         });
         
@@ -87,6 +88,7 @@ public class Game extends Environment
         {
            String randomRoom = roomNames.get(Utils.randomBetween.apply(map.size() - 1,0).intValue());
            gameCrew.put(key, new Pair(randomRoom,0l));
+           gameRooms.get(randomRoom).addCrew(key);
         });
         
         //Mapear sabotages
@@ -97,13 +99,24 @@ public class Game extends Environment
         });
          
         //Entregamos información de juego inicial
-        agent = new ImpostorAgent(gameRooms,gameCrew,sabotages);
+        agent = new ImpostorAgent(gameRooms,gameCrew,sabotages,this.goal);
     }
 
     @Override
     public EnvironmentState getEnvironmentState() 
     {
         return this.state;
+    }
+    
+    @Override
+    public String toString() 
+    {
+        return this.state.toString();
+    }
+    
+    public ImpostorAgent getAgent()
+    {
+        return this.agent;
     }
     
     //Percepcion que el mundo le da al agente. Transforma los datos a un formato que el agente entiende (DTO)
@@ -115,7 +128,7 @@ public class Game extends Environment
        Room agentLocation = state.getAgentRoom();
        RoomState roomState = agentLocation.getState();
        
-       List<String> neighbors = agentLocation.getNeighbors().stream().map(it -> it.getName()).toList();
+       List<String> neighbors = agentLocation.getNeighbors().stream().map(it -> it != null ? it.getName() : null).toList();
        List<String> crewPresent = roomState.getCurrentMembers().stream().map(it -> it.getName()).toList();
        
        String sabotage = roomState.isSabotable() ? roomState.getRoom().getSabotage().getName() : null;
@@ -149,7 +162,7 @@ public class Game extends Environment
     
        return agentPerc;
        
-    } 
+    }  
 
     @Override   //La condición la controla el GameGoal
     public boolean agentFailed(Action actionReturned) 
@@ -163,7 +176,7 @@ public class Game extends Environment
     {    
         //Secciones
         map.put("Motor superior", new Room("Motor superior", RoomType.SECCION));     
-        map.put("Motor Inferior", new Room("Motor Inferior", RoomType.SECCION));
+        map.put("Motor inferior", new Room("Motor inferior", RoomType.SECCION));
         map.put("Hospital",       new Room("Hospital", RoomType.SECCION));
         map.put("Cafetería",      new Room("Cafetería", RoomType.SECCION));
         map.put("Armas",          new Room("Armas", RoomType.SECCION));
@@ -186,12 +199,14 @@ public class Game extends Environment
         map.put("Pasillo este inferior",      new Room("Pasillo este inferior", RoomType.PASILLO));
         
         //Tuberias
+        /*
         map.put("Tubería RMS",        new Room("Tubería RMS", RoomType.TUBERIA));
         map.put("Tubería RMI",        new Room("Tubería RMI", RoomType.TUBERIA));
         map.put("Tubería SHE",        new Room("Tubería SHE", RoomType.TUBERIA));
         map.put("Tubería CAPEC",      new Room("Tubería CAPEC", RoomType.TUBERIA));
         map.put("Tubería AN",         new Room("Tubería AN", RoomType.TUBERIA));
         map.put("Tubería EN",         new Room("Tubería EN", RoomType.TUBERIA));
+        */
         
         //Adyacencias - Recordar que el vecino también añade al primero, no es necesario declararlo.
         map.get("Motor superior").addNeighbor(map.get("Pasillo oeste superior"), Cardinal.ESTE);
@@ -236,6 +251,9 @@ public class Game extends Environment
         map.get("Depósito").addNeighbor(map.get("Pasillo este inferior"), Cardinal.ESTE);
         map.get("Depósito").addNeighbor(map.get("Pasillo central"), Cardinal.NORTE);
         map.get("Depósito").addNeighbor(map.get("Pasillo oeste inferior"), Cardinal.OESTE);
+        
+        map.get("Administración").addNeighbor(map.get("Pasillo central"), Cardinal.OESTE);
+        
         
     }
 

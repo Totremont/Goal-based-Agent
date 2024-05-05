@@ -20,7 +20,7 @@ public class Kill extends SearchAction
     {
         var agentState = (ImpostorAgentState) s;
         
-        //if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
+        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
         
         //Si no hay nadie, abortar
         if(agentState.getCurrentRoom().getCrewPresent().isEmpty()) return null;
@@ -29,8 +29,10 @@ public class Kill extends SearchAction
         String crew = agentState.getCurrentRoom().getCrewPresent().stream().findAny().get();
         
         agentState.addCrewKilled(crew);
-        
+             
         agentState.getCurrentRoom().deleteCrew(crew);
+     
+        agentState.getAliveCrew().remove(crew);
         
         //Utils.energyPostCondition(agentState, ENERGY_COST);
         
@@ -46,9 +48,7 @@ public class Kill extends SearchAction
     @Override
     public EnvironmentState execute(AgentState ast, EnvironmentState est) 
     {
-        var agentState = (ImpostorAgentState) ast;
-        
-        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
+        var agentState = (ImpostorAgentState) ast;       
         
         if(this.execute(agentState) == null) return null;
         
@@ -63,13 +63,16 @@ public class Kill extends SearchAction
         
         gameState.setAgentEnergy(agentState.getEnergy());
         
+        WorldAction.advanceGame(gameState);
+        
         return gameState;
         
     }
 
     @Override
-    public String toString() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public String toString() 
+    {
+        return "Voy a asesinar a alguien";
     }
 
     

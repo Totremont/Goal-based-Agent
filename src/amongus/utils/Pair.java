@@ -29,6 +29,30 @@ public class Pair<T,K>
     public void setSecond(K second) {
         this.second = second;
     }
+
+    @Override
+    public Pair<T,K> clone() 
+    {
+        return new Pair(this.first,this.second);    //Shallow copy | Esto significa que T,K deben ser inmutables
+    }
+
+    @Override
+    public boolean equals(Object obj) 
+    {
+        if(!(obj instanceof Pair)) return false;
+        
+        var other = (Pair) obj;
+        
+        return 
+        (
+                other.getFirst().equals(this.first)
+                && other.getSecond().equals(this.second)
+        );
+    }
+    
+    
+    
+    
     
     
 

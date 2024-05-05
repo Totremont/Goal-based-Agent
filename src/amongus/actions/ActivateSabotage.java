@@ -21,7 +21,7 @@ public class ActivateSabotage extends SearchAction
     {
         var agentState = (ImpostorAgentState) s;
         
-        //if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
+        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
         
         //Si no es saboteable, salir
         if(!agentState.getCurrentRoom().isSabotable()) return null;
@@ -48,9 +48,7 @@ public class ActivateSabotage extends SearchAction
     public EnvironmentState execute(AgentState ast, EnvironmentState est) 
     {
         var agentState = (ImpostorAgentState) ast;
-        
-        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
-        
+                
         if(this.execute(agentState) == null) return null;
         
         Utils.energyPostCondition(agentState, ENERGY_COST);
@@ -61,13 +59,16 @@ public class ActivateSabotage extends SearchAction
         
         gameState.setAgentEnergy(agentState.getEnergy());
         
+        WorldAction.advanceGame(gameState);
+        
         return gameState;
         
     }
 
     @Override
-    public String toString() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public String toString() 
+    {
+        return "Voy a sabotear esta habitación";
     }
     
 }

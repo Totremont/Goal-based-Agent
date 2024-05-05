@@ -9,7 +9,7 @@ public class CrewMember
     private CrewMemberState state;
 
     public CrewMember(int id) {
-        this.name = new StringBuilder("Tripulante: #").append(id).toString();
+        this.name = new StringBuilder("Tripulante #").append(id).toString();
     }
 
     public CrewMemberState getState() {

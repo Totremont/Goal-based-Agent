@@ -21,7 +21,7 @@ public class ActivateSensor extends SearchAction
     {
         var agentState = (ImpostorAgentState) s;
         
-        //if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
+        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
         
         //Si no esta el sensor disponible, abortar
         if(!agentState.isSensorAvailable()) return null;
@@ -42,9 +42,7 @@ public class ActivateSensor extends SearchAction
     public EnvironmentState execute(AgentState ast, EnvironmentState est) 
     {
         var agentState = (ImpostorAgentState) ast;
-        
-        if(!Utils.energyPreCondition(agentState, ENERGY_COST)) return null;
-        
+               
         if(this.execute(agentState) == null) return null;
         
         Utils.energyPostCondition(agentState, ENERGY_COST);
