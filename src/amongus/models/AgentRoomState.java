@@ -108,4 +108,9 @@ public class AgentRoomState
     {
         return this.sabotage;
     }
+    
+    public boolean isCrewPresent()
+    {
+        return !this.crewPresent.isEmpty();
+    }
 }
