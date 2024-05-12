@@ -29,19 +29,24 @@ public class Game extends Environment
     private final GameGoal goal;
 
     // -- Parámetros de juego
-    public int MAX_ENERGY = 150;
-    public int MIN_ENERGY = 30;
-    public int MAX_CREW = 6;       //Con Costo uniforme: Hasta 6 | Con profundidad: Muchos más (Pero necesita potencialmente mucha energía)
-    public int MIN_CREW = 4;
-    public int MAX_CREW_STEP_TIME = 3;
-    public int MIN_CREW_STEP_TIME = 1;
-    public int MAX_AGENT_SENSOR_STEP_TIME = 5;
-    public int MIN_AGENT_SENSOR_STEP_TIME = 3;
+    public static int MAX_ENERGY = 150;
+    public static int MIN_ENERGY = 30;
+    public static int MAX_CREW = 12;       //Con Costo uniforme: Hasta 6 | Con profundidad: 0..* | Con Avaro: 12 | Con A*: Similar a Avaro
+    public static int MIN_CREW = 12;
+    public static int MAX_CREW_STEP_TIME = 3;           //Tiempo máximo para moverse
+    public static int MIN_CREW_STEP_TIME = 1;           //Tiempo mínimo para moverse
+    public static int MAX_AGENT_SENSOR_STEP_TIME = 5;   //Tiempo máximo para tener el sensor
+    public static int MIN_AGENT_SENSOR_STEP_TIME = 3;   //Tiempo mínimo para tener el sensor
 
     //Constructor con valores por defecto
     public Game()
     {
-        this(150,30,6,4,3,1,5,3);
+        this(
+                MAX_ENERGY,MIN_ENERGY,
+                MAX_CREW,MIN_CREW,
+                MAX_CREW_STEP_TIME,MIN_CREW_STEP_TIME,
+                MAX_AGENT_SENSOR_STEP_TIME,MIN_AGENT_SENSOR_STEP_TIME
+            );
     }
     
     //Constructor de juego

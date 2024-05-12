@@ -14,8 +14,11 @@ import frsf.cidisi.faia.agent.Perception;
 import frsf.cidisi.faia.agent.search.Problem;
 import frsf.cidisi.faia.agent.search.SearchAction;
 import frsf.cidisi.faia.agent.search.SearchBasedAgent;
+import frsf.cidisi.faia.solver.search.AStarSearch;
 import frsf.cidisi.faia.solver.search.BreathFirstSearch;
 import frsf.cidisi.faia.solver.search.DepthFirstSearch;
+import frsf.cidisi.faia.solver.search.GreedySearch;
+import frsf.cidisi.faia.solver.search.IEstimatedCostFunction;
 import frsf.cidisi.faia.solver.search.IStepCostFunction;
 import frsf.cidisi.faia.solver.search.Search;
 import frsf.cidisi.faia.solver.search.UniformCostSearch;
@@ -60,11 +63,21 @@ public class ImpostorAgent extends SearchBasedAgent
         //DepthFirstSearch strategy = new DepthFirstSearch();
         //BreathFirstSearch strategy = new BreathFirstSearch();
         
+        /*
         //Uniform Cost:
         IStepCostFunction costFunction = new AgentStateCost();
         UniformCostSearch strategy = new UniformCostSearch(costFunction);
         
         System.out.println("Resolviendo con costo uniforme");
+        */
+        /*
+        IEstimatedCostFunction heuristic = new AgentHeuristic();
+        GreedySearch strategy = new GreedySearch(heuristic);
+        */
+        IStepCostFunction cost = new AgentStateCost();
+        IEstimatedCostFunction heuristic = new AgentHeuristic();
+        AStarSearch strategy = new AStarSearch(cost, heuristic);
+         
 
         Search searchSolver = new Search(strategy);
 
@@ -95,9 +108,6 @@ public class ImpostorAgent extends SearchBasedAgent
     public void see(Perception p) 
     {
         this.myState.updateState(p);
-    }
-    
-    
-    
+    }    
 
 }
