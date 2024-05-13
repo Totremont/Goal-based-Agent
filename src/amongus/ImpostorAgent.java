@@ -70,13 +70,15 @@ public class ImpostorAgent extends SearchBasedAgent
         
         System.out.println("Resolviendo con costo uniforme");
         */
-        /*
+        
         IEstimatedCostFunction heuristic = new AgentHeuristic();
         GreedySearch strategy = new GreedySearch(heuristic);
-        */
+        
+        /*
         IStepCostFunction cost = new AgentStateCost();
         IEstimatedCostFunction heuristic = new AgentHeuristic();
         AStarSearch strategy = new AStarSearch(cost, heuristic);
+        */
          
 
         Search searchSolver = new Search(strategy);

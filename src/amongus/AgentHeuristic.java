@@ -46,10 +46,11 @@ public class AgentHeuristic implements IEstimatedCostFunction
         List<String> neighbors = agentRoom.getNeighbors();
 
         List<Integer> aux = new ArrayList<>();
+        
+        visited.add(agentRoom.getName());
 
         for(int  i = 0; i < neighbors.size(); i++)
         {
-            visited.add(agentRoom.getName());
             
             String neigh = neighbors.get(i);
             if(neigh == null || visited.contains(neigh)) continue;

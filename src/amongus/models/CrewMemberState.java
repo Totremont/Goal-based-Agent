@@ -49,6 +49,25 @@ public class CrewMemberState {
         return lastMoveTime;
     }
     
+    //Constructor especial para clonar
+    public CrewMemberState(CrewMember crew, Room room, Long lastMoveTime, Boolean isAlive, Boolean copyFlag) 
+    {
+        this.crew = crew;
+        //this.crew.setState(this);
+        this.currentRoom = room;
+        this.isAlive = isAlive;
+        this.lastMoveTime = lastMoveTime;
+    } 
+
+    @Override
+    public CrewMemberState clone()
+    {
+        CrewMemberState newState = new CrewMemberState(this.crew,this.currentRoom,this.lastMoveTime, this.isAlive,true);
+        return newState;
+    }
+    
+    
+    
     
     
     

@@ -27,12 +27,13 @@ public class Game extends Environment
     private final ImpostorAgent agent;
     private final GameState state;
     private final GameGoal goal;
+    private final List<GameState> gameHistory = new ArrayList<>();
 
     // -- Parámetros de juego
     public static int MAX_ENERGY = 150;
     public static int MIN_ENERGY = 30;
-    public static int MAX_CREW = 12;       //Con Costo uniforme: Hasta 6 | Con profundidad: 0..* | Con Avaro: 12 | Con A*: Similar a Avaro
-    public static int MIN_CREW = 12;
+    public static int MAX_CREW = 8;       //Con Costo uniforme: Hasta 6 | Con profundidad: 0..* | Con Avaro: 12 | Con A*: Similar a Avaro
+    public static int MIN_CREW = 8;
     public static int MAX_CREW_STEP_TIME = 3;           //Tiempo máximo para moverse
     public static int MIN_CREW_STEP_TIME = 1;           //Tiempo mínimo para moverse
     public static int MAX_AGENT_SENSOR_STEP_TIME = 5;   //Tiempo máximo para tener el sensor
@@ -98,6 +99,8 @@ public class Game extends Environment
     @Override
     public Perception getPercept() 
     {
+       copyGameState(); //Guardamos registro del estado actual
+       
        ImpostorAgentPerc agentPerc; //Percepción a entregar
        
        Room agentLocation = state.getAgentRoom();
@@ -259,5 +262,18 @@ public class Game extends Environment
         //Entregamos información de juego inicial
         return new ImpostorAgent(gameRooms,gameCrew,sabotages,this.goal);
     }
+    
+    //Copia el estado actual y lo guarda en el registro
+    private void copyGameState()
+    {
+        System.out.println("Se clonó el estado de juego");
+        gameHistory.add(state.clone());
+    }
+
+    public List<GameState> getGameHistory() {
+        return gameHistory;
+    }
+    
+    
 
 }

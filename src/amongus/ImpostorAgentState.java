@@ -14,7 +14,7 @@ import java.util.List;
 public class ImpostorAgentState extends SearchBasedAgentState 
 {
     private AgentRoomState currentRoom;
-    
+     
     //Habitación de la que vengo
     private AgentRoomState previousRoom;
     
@@ -26,7 +26,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
     //Nombre del tripulante vivo / última ubicación conocida - tiempo de avistamiento (unused actualmente)
     private final HashMap<String, Pair<String,Long>> aliveCrew = new HashMap<>();
     
-    private final ArrayList<String> requiredSabotages = new ArrayList<>();
+    private final static ArrayList<String> requiredSabotages = new ArrayList<>();
     private final ArrayList<String> doneSabotages = new ArrayList<>();
     
     private Long gameTime;
@@ -46,7 +46,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
     {
         this.knownRooms.putAll(gameRooms);
         this.aliveCrew.putAll(gameCrew); 
-        this.requiredSabotages.addAll(sabotages);
+        if(ImpostorAgentState.requiredSabotages.isEmpty()) ImpostorAgentState.requiredSabotages.addAll(sabotages);
         this.decisionCost = 0l;
        
     }
@@ -101,7 +101,7 @@ public class ImpostorAgentState extends SearchBasedAgentState
                 //&& other.getCrewKilled().equals(this.crewKilled)
                 //&& other.getAliveCrew().equals(this.aliveCrew)
                 //&& other.getRequiredSabotages().equals(this.requiredSabotages)
-                && other.getDoneSabotages().equals(this.doneSabotages)
+                //&& other.getDoneSabotages().equals(this.doneSabotages)
                 //&& other.getGameTime().equals(this.gameTime)
                 //&& other.getEnergy().equals(this.energy)
                 //&& other.isSensorAvailable() == this.sensorAvailable

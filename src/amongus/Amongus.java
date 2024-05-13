@@ -2,6 +2,7 @@
 package amongus;
 
 import frsf.cidisi.faia.simulator.SearchBasedAgentSimulator;
+import java.util.List;
 
 public class Amongus 
 {
@@ -17,6 +18,9 @@ public class Amongus
         System.out.println("--Último estado--");
         System.out.println(game.getEnvironmentState().toString());
         System.out.println(game.getAgent().getAgentState().toString());
+        
+        //Podemos obtener el registro acá
+        List<GameState> gameHistory = game.getGameHistory();
         
         
     }

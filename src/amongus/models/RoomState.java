@@ -19,7 +19,7 @@ public class RoomState
         this.room = room;
         room.setState(this);
         this.agentPresent = false;
-        isSabotable = room.getSabotage() != null;
+        this.isSabotable = room.getSabotage() != null;
     }
 
     public void addMember(CrewMember crew) 
@@ -55,6 +55,26 @@ public class RoomState
     public Boolean isSabotable() {
         return isSabotable;
     }
+    
+    //Constructor para clonar
+    public RoomState(Room room, Boolean agentPresent, List<CrewMember> currentMembers, Boolean isSabotable, Boolean copyFlag) 
+    {
+        this.room = room;
+        //room.setState(this);
+        this.agentPresent = agentPresent;
+        this.isSabotable = isSabotable;
+        this.currentMembers.addAll(currentMembers);
+    }
+
+    @Override
+    public RoomState clone()
+    {
+        RoomState newState = new RoomState(this.room,this.agentPresent, this.currentMembers,this.isSabotable,true);
+        
+        return newState;
+    }
+    
+    
     
     
 
