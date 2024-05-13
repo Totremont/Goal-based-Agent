@@ -14,11 +14,11 @@ import java.util.List;
 public class AgentHeuristic implements IEstimatedCostFunction 
 {
     /*
-        Es un número en formato VVSSDD (Asume que el valor máximo de c/u es 99)
+        Es un número en formato VVDDSS (Asume que el valor máximo de c/u es 99)
         Donde: 
         -   VV : Tripulantes vivos
-        -   SS : Distancia más cercana a un tripulante
         -   DD : Sabotajes restantes
+        -   SS : Distancia más cercana a un tripulante
         Al finalizar, el número quedaría 000000 -> 0;
                 
     */
