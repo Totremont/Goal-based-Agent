@@ -15,13 +15,13 @@ import java.util.ArrayList;
 //El GameState contiene el estado completo del juego
 public class GameState extends EnvironmentState 
 {
-    private final Game environment;
+    private static Game environment;
     
     //Atributos del mundo
-    private final HashMap<String,Room> map;
-    private final HashMap<String,Sabotage> sabotages;
-    private final List<RoomState> roomStates = new ArrayList<>();   
-    private final HashMap<String, CrewMember> crews = new HashMap<>();
+    private static HashMap<String,Room> map;
+    private static HashMap<String,Sabotage> sabotages; 
+    private static HashMap<String, CrewMember> crews = new HashMap<>();
+    private final List<RoomState> roomStates = new ArrayList<>();  
     private final List<CrewMemberState> crewStates = new ArrayList<>();   
     private Long gameTime;
     
@@ -37,9 +37,9 @@ public class GameState extends EnvironmentState
     public GameState(Game environment) 
     {
         //Setear información estática
-        this.environment = environment;
-        this.map = this.environment.map;
-        this.sabotages = this.environment.sabotages;
+        GameState.environment = environment;
+        GameState.map = GameState.environment.map;
+        GameState.sabotages = GameState.environment.sabotages;
         
         //Setear estado inicial del juego
         this.initState();
@@ -113,15 +113,15 @@ public class GameState extends EnvironmentState
 
     public void addCrewKilled(String name)
     {
-        CrewMember crew = this.crews.get(name);
+        CrewMember crew = GameState.crews.get(name);
         crew.getState().setIsAlive(false);
         crew.getState().getCurrentRoom().getState().deleteMember(crew);
     }
     
     public void setCrewRoom(String crewName, String roomName, Long gameTime)
     {
-        CrewMember crew = this.crews.get(crewName);
-        Room newRoom = this.map.get(roomName);
+        CrewMember crew = GameState.crews.get(crewName);
+        Room newRoom = GameState.map.get(roomName);
         crew.getState().getCurrentRoom().getState().deleteMember(crew);
         crew.getState().setCurrentRoom(newRoom);
         newRoom.getState().addMember(crew);
@@ -130,7 +130,7 @@ public class GameState extends EnvironmentState
     
     public void removeSabotage(String name) //Cuando se completa un sabotaje
     {
-        this.sabotages.get(name).getRoom().getState().setIsSabotable(false);
+        GameState.sabotages.get(name).getRoom().getState().setIsSabotable(false);
     }
 
     /* Unused 
@@ -216,7 +216,7 @@ public class GameState extends EnvironmentState
         
     public HashMap<String,Sabotage> getSabotages()
     {
-        return this.sabotages;
+        return GameState.sabotages;
     }
     
     @Override
@@ -238,6 +238,41 @@ public class GameState extends EnvironmentState
         return text.toString();
         
     }
+
+    /*
+        Usando por el Game para clonar el estado
+        Nota: las referencias de las entidades a sus estados no son guardadas en las copias. (Para que no apunten a un estado copiado)
+    */
+    
+    public GameState(List<RoomState> roomStates, List<CrewMemberState> crewStates, Long gameTime, 
+            Room agentRoom, Long agentEnergy, Long agentSensorLastTime, Boolean omniscientAgent, Boolean copyFlag )
+    {
+        this.roomStates.addAll(roomStates);
+        this.crewStates.addAll(crewStates);
+        this.gameTime = gameTime;
+        this.agentRoom = agentRoom;
+        this.agentEnergy = agentEnergy;
+        this.agentSensorLastTime = agentSensorLastTime;
+        this.omniscientAgent = omniscientAgent;
+    }
+    
+    @Override
+    public GameState clone()
+    {
+        List<RoomState> roomStatesClone = new ArrayList<>();
+        List<CrewMemberState> crewStatesClone = new ArrayList<>();
+        
+        this.roomStates.stream().forEach(it -> roomStatesClone.add(it.clone()));
+        
+        this.crewStates.stream().forEach(it -> crewStatesClone.add(it.clone()));
+        
+        GameState newState = new GameState(roomStatesClone, crewStatesClone,
+                this.gameTime,this.agentRoom,this.agentEnergy,this.agentSensorLastTime,this.omniscientAgent,true);
+        
+        return newState;
+    }
+    
+    
     
     
     
