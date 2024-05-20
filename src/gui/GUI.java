@@ -44,6 +44,7 @@ public class GUI extends JFrame implements KeyListener {
 	private JLabel iconExtrasensorialLabel;
 	private JLabel textGameTimeLabel;
 	private JLabel textGameTimeNumberLabel;
+	private JLabel textAgentEnergyLabel;
 
 	private List<GameState> environmentStates;
 	private Boolean resultadoMeta;
@@ -57,6 +58,9 @@ public class GUI extends JFrame implements KeyListener {
 	private long lastPressProcessed = 0;
 
 	public GUI(List<GameState> environmentStates, Boolean resultadoMeta) {
+
+		// La Interfaz Gráfica esta por el momento configurada solo para ejecutarse en
+		// una resolución de pantalla de 1366*768
 
 		this.environmentStates = environmentStates;
 		this.resultadoMeta = resultadoMeta;
@@ -161,16 +165,23 @@ public class GUI extends JFrame implements KeyListener {
 		// Gametime
 		textGameTimeLabel = new JLabel("GAME TIME");
 		textGameTimeLabel.setFont(new Font("In your face, Joffrey! ", Font.BOLD, 50));
-		textGameTimeLabel.setBounds(50, 40, 160, 60);
+		textGameTimeLabel.setBounds(30, 40, 160, 60);
 		textGameTimeLabel.setForeground(Color.BLUE);
 		mapPanel.add(textGameTimeLabel);
 
 		textGameTimeNumberLabel = new JLabel(" " + state.getGameTime().toString());
 		textGameTimeNumberLabel.setFont(new Font("In your face, Joffrey! ", Font.BOLD, 50));
-		textGameTimeNumberLabel.setBounds(96, 100, 70, 60);
+		textGameTimeNumberLabel.setBounds(76, 100, 70, 60);
 		textGameTimeNumberLabel.setForeground(Color.BLUE);
-		textGameTimeNumberLabel.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2)); // Borde
+		textGameTimeNumberLabel.setBorder(BorderFactory.createLineBorder(Color.CYAN, 4)); // Borde
 		mapPanel.add(textGameTimeNumberLabel);
+
+		// Energia del Agente
+		textAgentEnergyLabel = new JLabel("AGENT ENERGY: " + state.getAgentEnergy().toString());
+		textAgentEnergyLabel.setFont(new Font("VCR OSD Mono", Font.BOLD, 18));
+		textAgentEnergyLabel.setBounds(588, 650, 190, 60);
+		textAgentEnergyLabel.setForeground(Color.WHITE);
+		mapPanel.add(textAgentEnergyLabel);
 
 		// Selección del modo de simulación
 		int dialogResult = JOptionPane.showConfirmDialog(null, "¿Controlar la simulación manualmente?",
@@ -195,7 +206,7 @@ public class GUI extends JFrame implements KeyListener {
 	}
 
 	private void restartSimulation(List<GameState> gameHistory, Boolean finalResult) {
-		// Limpia ventana actual
+		// Limpio ventana
 		dispose();
 		// Reinicio la simulación con una nueva instancia de la GUI
 		new Amongus().startGraphicSimulation(gameHistory, finalResult);
@@ -262,6 +273,8 @@ public class GUI extends JFrame implements KeyListener {
 
 		// Actualizo GameTime
 		textGameTimeNumberLabel.setText(" " + state.getGameTime().toString());
+		// Actualizo Agent Energy
+		textAgentEnergyLabel.setText("AGENT ENERGY: " + state.getAgentEnergy().toString());
 
 		// Actualizo el impostor
 		updateImpostor(state.getAgentRoom().getName());
@@ -550,7 +563,7 @@ public class GUI extends JFrame implements KeyListener {
 
 		int labelSizeOriginal = 30;
 		int labelSizeNuevo = 70;
-		// Por cambio de resolucion
+		// Ajuste por cambio de resolucion
 		int ajuste = (labelSizeNuevo - labelSizeOriginal) / 2; // Ajuste para centrar la imagen
 		int ajusteYAdicional = 15; // Ajuste extra en la coordenada y
 
