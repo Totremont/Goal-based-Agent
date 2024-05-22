@@ -2,8 +2,10 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Arrays;
@@ -31,12 +33,25 @@ import java.awt.Font;
 public class GUI extends JFrame implements KeyListener {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final double SCALE_X;
+	private static final double SCALE_Y;
+
+	static {
+		// Obtengo resolución de pantalla actual
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int screenWidth = (int) screenSize.getWidth();
+		int screenHeight = (int) screenSize.getHeight();
+
+		// Calculo los factores de escala
+		SCALE_X = screenWidth / 1366.0;
+		SCALE_Y = screenHeight / 768.0;
+	}
+
 	private JPanel contentPane;
 	private MapPanel mapPanel;
-
 	public final HashMap<String, Point> mapPixelsImpostor = new HashMap<>();
 	public final HashMap<String, Point> mapPixelsCrewMember = new HashMap<>();
-
 	private JLabel impostorLabel;
 	private HashMap<String, JLabel> tripulantesLabels = new HashMap<>();
 	private JLabel killAvailableLabel;
@@ -45,30 +60,27 @@ public class GUI extends JFrame implements KeyListener {
 	private JLabel textGameTimeLabel;
 	private JLabel textGameTimeNumberLabel;
 	private JLabel textAgentEnergyLabel;
-
 	private List<GameState> environmentStates;
 	private Boolean resultadoMeta;
-
 	private Timer timer;
 	private int currentStateIndex = 0;
-
 	private HashMap<String, List<Point>> availablePoints;
-
-	private boolean isManualControl = false; // Controla el modo de simulación
+	private boolean isManualControl = false;
 	private long lastPressProcessed = 0;
 
 	public GUI(List<GameState> environmentStates, Boolean resultadoMeta) {
 
-		// La Interfaz Gráfica esta por el momento configurada solo para ejecutarse en
-		// una resolución de pantalla de 1366*768
+		// La Interfaz Gráfica estaba por el momento configurada solo para ejecutarse
+		// en una resolución de pantalla de 1366*768,
+		// asi que se uso un enfoque de escalado para adaptar las coordenadas
+		// y tamaños de los componentes a la resolución actual de la pantalla.
 
 		this.environmentStates = environmentStates;
 		this.resultadoMeta = resultadoMeta;
 
-		// Ventana principal
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		setExtendedState(JFrame.MAXIMIZED_BOTH); // Maximiza la ventana
+		setSize((int) (1366 * SCALE_X), (int) (768 * SCALE_Y)); // Ajusto el tamaño de la ventana
+		setLocationRelativeTo(null);
 		setVisible(true);
 
 		contentPane = new JPanel();
@@ -76,13 +88,11 @@ public class GUI extends JFrame implements KeyListener {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 
-		// Agrega el panel del mapa
 		mapPanel = new MapPanel();
 		mapPanel.setLayout(null);
 		contentPane.add(mapPanel, BorderLayout.CENTER);
 
-		setGameMapPixels(this.mapPixelsImpostor); // Seteo posiciones para el impostor
-
+		setGameMapPixels(this.mapPixelsImpostor);
 		availablePoints = new HashMap<>();
 		setInitialPoints();
 
@@ -90,38 +100,41 @@ public class GUI extends JFrame implements KeyListener {
 
 		// Agrego agente
 		ImageIcon iconoImpostor = new ImageIcon(GUI.class.getResource("/gui/impostorKnifeRed.png"));
-		Image imagenImpostor = iconoImpostor.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
+		Image imagenImpostor = iconoImpostor.getImage().getScaledInstance((int) (70 * SCALE_X), (int) (70 * SCALE_Y),
+				Image.SCALE_SMOOTH);
 		iconoImpostor = new ImageIcon(imagenImpostor);
-
 		impostorLabel = new JLabel(iconoImpostor);
-		impostorLabel.setBounds(mapPixelsImpostor.get(state.getAgentRoom().getName()).x,
-				mapPixelsImpostor.get(state.getAgentRoom().getName()).y, 70, 70);
+		impostorLabel.setBounds((int) (mapPixelsImpostor.get(state.getAgentRoom().getName()).x * SCALE_X),
+				(int) (mapPixelsImpostor.get(state.getAgentRoom().getName()).y * SCALE_Y), (int) (70 * SCALE_X),
+				(int) (70 * SCALE_Y));
 		mapPanel.add(impostorLabel);
 
 		// Agrego Crewmates
 		for (String key : state.getCrews().keySet()) {
 			int id = Integer.parseInt(key.split("#")[1]);
-			int imageNumber = (id % 10) + 1; // número de imagen (repetido si es más de 10)
+			int imageNumber = (id % 10) + 1;
 			JLabel tripulante = new JLabel("tripulante" + id);
 			tripulante.setName("tripulante" + id);
-
 			String imageName;
 			if (state.getCrewStates().get(id).isAlive())
 				imageName = "/gui/crewmate";
 			else
 				imageName = "/gui/deadcrewmate";
 			ImageIcon iconoTripulante = new ImageIcon(GUI.class.getResource(imageName + imageNumber + ".png"));
-			Image imagenTripulante = iconoTripulante.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+			Image imagenTripulante = iconoTripulante.getImage().getScaledInstance((int) (30 * SCALE_X),
+					(int) (30 * SCALE_Y), Image.SCALE_SMOOTH);
 			iconoTripulante = new ImageIcon(imagenTripulante);
 			tripulante = new JLabel(iconoTripulante);
-			tripulante.setBounds(this.getAvailablePoint(state.getCrewStates().get(id).getCurrentRoom().getName()).x,
-					this.getAvailablePoint(state.getCrewStates().get(id).getCurrentRoom().getName()).y, 30, 30);
+			tripulante.setBounds(
+					(int) (this.getAvailablePoint(state.getCrewStates().get(id).getCurrentRoom().getName()).x
+							* SCALE_X),
+					(int) (this.getAvailablePoint(state.getCrewStates().get(id).getCurrentRoom().getName()).y
+							* SCALE_Y),
+					(int) (30 * SCALE_X), (int) (30 * SCALE_Y));
 			mapPanel.add(tripulante);
-			tripulantesLabels.put(key, tripulante); // Guardo el JLabel en el HashMap
+			tripulantesLabels.put(key, tripulante);
 		}
-		;
 
-		// Agrego killAvailable;
 		String imageNameKill;
 		if (state.getCrewStates().stream()
 				.anyMatch(x -> x.getCurrentRoom().getName().equals(state.getAgentRoom().getName()) && x.isAlive()))
@@ -129,11 +142,12 @@ public class GUI extends JFrame implements KeyListener {
 		else
 			imageNameKill = "/gui/killOff.png";
 		ImageIcon iconoKillAvailable = new ImageIcon(GUI.class.getResource(imageNameKill));
-		Image imagenKillAvailable = iconoKillAvailable.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+		Image imagenKillAvailable = iconoKillAvailable.getImage().getScaledInstance((int) (80 * SCALE_X),
+				(int) (80 * SCALE_Y), Image.SCALE_SMOOTH);
 		iconoKillAvailable = new ImageIcon(imagenKillAvailable);
-
 		killAvailableLabel = new JLabel(iconoKillAvailable);
-		killAvailableLabel.setBounds(1140, 590, 80, 80);
+		killAvailableLabel.setBounds((int) (1140 * SCALE_X), (int) (590 * SCALE_Y), (int) (80 * SCALE_X),
+				(int) (80 * SCALE_Y));
 		mapPanel.add(killAvailableLabel);
 
 		// Agrego sabotageAvailable
@@ -143,10 +157,12 @@ public class GUI extends JFrame implements KeyListener {
 		else
 			imageNameSabotage = "/gui/sabotageOff.png";
 		ImageIcon iconoSabotageAvailable = new ImageIcon(GUI.class.getResource(imageNameSabotage));
-		Image imagenSabotageAvailable = iconoSabotageAvailable.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+		Image imagenSabotageAvailable = iconoSabotageAvailable.getImage().getScaledInstance((int) (80 * SCALE_X),
+				(int) (80 * SCALE_Y), Image.SCALE_SMOOTH);
 		iconoSabotageAvailable = new ImageIcon(imagenSabotageAvailable);
 		sabotageAvailableLabel = new JLabel(iconoSabotageAvailable);
-		sabotageAvailableLabel.setBounds(1240, 590, 80, 80);
+		sabotageAvailableLabel.setBounds((int) (1240 * SCALE_X), (int) (590 * SCALE_Y), (int) (80 * SCALE_X),
+				(int) (80 * SCALE_Y));
 		mapPanel.add(sabotageAvailableLabel);
 
 		// Agrego extrasensorialAvailable
@@ -156,30 +172,35 @@ public class GUI extends JFrame implements KeyListener {
 		else
 			imageNameExtrasensorial = "/gui/extrasensorialOff.png";
 		ImageIcon iconExtrasensorial = new ImageIcon(GUI.class.getResource(imageNameExtrasensorial));
-		Image imagenExtrasensorial = iconExtrasensorial.getImage().getScaledInstance(130, 130, Image.SCALE_SMOOTH);
+		Image imagenExtrasensorial = iconExtrasensorial.getImage().getScaledInstance((int) (130 * SCALE_X),
+				(int) (130 * SCALE_Y), Image.SCALE_SMOOTH);
 		iconExtrasensorial = new ImageIcon(imagenExtrasensorial);
 		iconExtrasensorialLabel = new JLabel(iconExtrasensorial);
-		iconExtrasensorialLabel.setBounds(60, 570, 130, 130);
+		iconExtrasensorialLabel.setBounds((int) (60 * SCALE_X), (int) (570 * SCALE_Y), (int) (130 * SCALE_X),
+				(int) (130 * SCALE_Y));
 		mapPanel.add(iconExtrasensorialLabel);
 
 		// Gametime
 		textGameTimeLabel = new JLabel("GAME TIME");
-		textGameTimeLabel.setFont(new Font("In your face, Joffrey! ", Font.BOLD, 50));
-		textGameTimeLabel.setBounds(30, 40, 160, 60);
+		textGameTimeLabel.setFont(new Font("In your face, Joffrey! ", Font.BOLD, (int) (50 * SCALE_X)));
+		textGameTimeLabel.setBounds((int) (30 * SCALE_X), (int) (40 * SCALE_Y), (int) (160 * SCALE_X),
+				(int) (60 * SCALE_Y));
 		textGameTimeLabel.setForeground(Color.BLUE);
 		mapPanel.add(textGameTimeLabel);
 
 		textGameTimeNumberLabel = new JLabel(" " + state.getGameTime().toString());
-		textGameTimeNumberLabel.setFont(new Font("In your face, Joffrey! ", Font.BOLD, 50));
-		textGameTimeNumberLabel.setBounds(76, 100, 70, 60);
+		textGameTimeNumberLabel.setFont(new Font("In your face, Joffrey! ", Font.BOLD, (int) (50 * SCALE_X)));
+		textGameTimeNumberLabel.setBounds((int) (76 * SCALE_X), (int) (100 * SCALE_Y), (int) (70 * SCALE_X),
+				(int) (60 * SCALE_Y));
 		textGameTimeNumberLabel.setForeground(Color.BLUE);
 		textGameTimeNumberLabel.setBorder(BorderFactory.createLineBorder(Color.CYAN, 4)); // Borde
 		mapPanel.add(textGameTimeNumberLabel);
 
 		// Energia del Agente
 		textAgentEnergyLabel = new JLabel("AGENT ENERGY: " + state.getAgentEnergy().toString());
-		textAgentEnergyLabel.setFont(new Font("VCR OSD Mono", Font.BOLD, 18));
-		textAgentEnergyLabel.setBounds(588, 650, 190, 60);
+		textAgentEnergyLabel.setFont(new Font("VCR OSD Mono", Font.BOLD, (int) (18 * SCALE_X)));
+		textAgentEnergyLabel.setBounds((int) (578 * SCALE_X), (int) (650 * SCALE_Y), (int) (210 * SCALE_X),
+				(int) (60 * SCALE_Y));
 		textAgentEnergyLabel.setForeground(Color.WHITE);
 		mapPanel.add(textAgentEnergyLabel);
 
@@ -281,10 +302,10 @@ public class GUI extends JFrame implements KeyListener {
 
 		// Actualizo los tripulantes
 		for (int i = 0; i < state.getCrewStates().size(); i++) {
-			if (!state.getCrewStates().get(i).isAlive()) { // Esta muerto
-				if (stateAnterior.getCrewStates().get(i).isAlive()) // Ya estaba muerto?
-					killCrewMember(state.getCrewStates().get(i)); // Lo mato
-			} else { // Esta vivo, veo si cambio de posicion
+			if (!state.getCrewStates().get(i).isAlive()) {
+				if (stateAnterior.getCrewStates().get(i).isAlive())
+					killCrewMember(state.getCrewStates().get(i));
+			} else {
 				if (!state.getCrewStates().get(i).getCurrentRoom().getName()
 						.equals(stateAnterior.getCrewStates().get(i).getCurrentRoom().getName())) {
 					updateCrewMember(state.getCrewStates().get(i));
@@ -320,10 +341,10 @@ public class GUI extends JFrame implements KeyListener {
 			imageName = "/gui/crewmate";
 
 		ImageIcon iconoTripulante = new ImageIcon(GUI.class.getResource(imageName + imageNumber + ".png"));
-		Image imagenTripulante = iconoTripulante.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+		Image imagenTripulante = iconoTripulante.getImage().getScaledInstance((int) (30 * SCALE_X),
+				(int) (30 * SCALE_Y), Image.SCALE_SMOOTH);
 		iconoTripulante = new ImageIcon(imagenTripulante);
 		crewMemberLabel.setIcon(iconoTripulante);
-
 	}
 
 //Borde amarillo al obtener Extrasensorial
@@ -343,7 +364,8 @@ public class GUI extends JFrame implements KeyListener {
 					finalNombre = ".png";
 				ImageIcon iconoTripulante = new ImageIcon(
 						GUI.class.getResource("/gui/crewmate" + imageNumber + finalNombre));
-				Image imagenTripulante = iconoTripulante.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+				Image imagenTripulante = iconoTripulante.getImage().getScaledInstance((int) (30 * SCALE_X),
+						(int) (30 * SCALE_Y), Image.SCALE_SMOOTH);
 				iconoTripulante = new ImageIcon(imagenTripulante);
 				crewMemberLabel.setIcon(iconoTripulante);
 			}
@@ -356,12 +378,12 @@ public class GUI extends JFrame implements KeyListener {
 		// Rango de posiciones
 		Point newPositionRango = getAvailablePoint(crewState.getCurrentRoom().getName());
 		JLabel crewMemberLabel = tripulantesLabels.get(crewState.getCrew().getName());
-		crewMemberLabel.setLocation(newPositionRango);
+		crewMemberLabel.setLocation((int) (newPositionRango.x * SCALE_X), (int) (newPositionRango.y * SCALE_Y));
 	}
 
 	private void updateImpostor(String roomName) {
 		Point newPosition = mapPixelsImpostor.get(roomName);
-		impostorLabel.setLocation(newPosition);
+		impostorLabel.setLocation((int) (newPosition.x * SCALE_X), (int) (newPosition.y * SCALE_Y));
 
 	}
 
@@ -374,7 +396,8 @@ public class GUI extends JFrame implements KeyListener {
 		else
 			imageNameKill = "/gui/killOff.png";
 		ImageIcon iconoKillAvailable = new ImageIcon(GUI.class.getResource(imageNameKill));
-		Image imagenKillAvailable = iconoKillAvailable.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+		Image imagenKillAvailable = iconoKillAvailable.getImage().getScaledInstance((int) (80 * SCALE_X),
+				(int) (80 * SCALE_Y), Image.SCALE_SMOOTH);
 		iconoKillAvailable = new ImageIcon(imagenKillAvailable);
 		killAvailableLabel.setIcon(iconoKillAvailable);
 
@@ -389,7 +412,8 @@ public class GUI extends JFrame implements KeyListener {
 		else
 			imageNameSabotage = "/gui/sabotageOff.png";
 		ImageIcon iconoSabotageAvailable = new ImageIcon(GUI.class.getResource(imageNameSabotage));
-		Image imagenSabotageAvailable = iconoSabotageAvailable.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+		Image imagenSabotageAvailable = iconoSabotageAvailable.getImage().getScaledInstance((int) (80 * SCALE_X),
+				(int) (80 * SCALE_Y), Image.SCALE_SMOOTH);
 		iconoSabotageAvailable = new ImageIcon(imagenSabotageAvailable);
 		sabotageAvailableLabel.setIcon(iconoSabotageAvailable);
 
@@ -406,13 +430,14 @@ public class GUI extends JFrame implements KeyListener {
 			exposeCrews(state, false);
 		}
 		ImageIcon iconExtrasensorial = new ImageIcon(GUI.class.getResource(imageNameExtrasensorial));
-		Image imagenExtrasensorial = iconExtrasensorial.getImage().getScaledInstance(130, 130, Image.SCALE_SMOOTH);
+		Image imagenExtrasensorial = iconExtrasensorial.getImage().getScaledInstance((int) (130 * SCALE_X),
+				(int) (130 * SCALE_Y), Image.SCALE_SMOOTH);
 		iconExtrasensorial = new ImageIcon(imagenExtrasensorial);
 		iconExtrasensorialLabel.setIcon(iconExtrasensorial);
 	}
 
 	private void updateTaskIcon(GameState state) {
-		//
+		// ver
 		List<String> listaRoomSabotages = state.getRoomStates().stream().filter(x -> x.isSabotable())
 				.map(x -> x.getRoom().getName()).toList();
 
@@ -474,8 +499,9 @@ public class GUI extends JFrame implements KeyListener {
 
 		JLabel textSabotagesGoalLabel = new JLabel(
 				"  " + (cantidadSabotages - cantidadSabotagesNow) + "/" + cantidadSabotages + " sabotages completed.");
-		textSabotagesGoalLabel.setFont(new Font("VCR OSD Mono", Font.BOLD, 20));
-		textSabotagesGoalLabel.setBounds(510, 430, 330, 32);
+		textSabotagesGoalLabel.setFont(new Font("VCR OSD Mono", Font.BOLD, (int) (20 * SCALE_X)));
+		textSabotagesGoalLabel.setBounds((int) (510 * SCALE_X), (int) (430 * SCALE_Y), (int) (330 * SCALE_X),
+				(int) (32 * SCALE_Y));
 		textSabotagesGoalLabel.setOpaque(true);
 		textSabotagesGoalLabel.setBackground(Color.BLACK);
 		textSabotagesGoalLabel.setForeground(textColor);
@@ -483,8 +509,9 @@ public class GUI extends JFrame implements KeyListener {
 
 		JLabel textCrewmembersGoalLabel = new JLabel("  " + (cantidadCrewmembers - cantidadCrewmembersNow) + "/"
 				+ cantidadCrewmembers + " crewmembers killed.");
-		textCrewmembersGoalLabel.setFont(new Font("VCR OSD Mono", Font.BOLD, 20));
-		textCrewmembersGoalLabel.setBounds(510, 480, 330, 32);
+		textCrewmembersGoalLabel.setFont(new Font("VCR OSD Mono", Font.BOLD, (int) (20 * SCALE_X)));
+		textCrewmembersGoalLabel.setBounds((int) (510 * SCALE_X), (int) (480 * SCALE_Y), (int) (330 * SCALE_X),
+				(int) (32 * SCALE_Y));
 		textCrewmembersGoalLabel.setOpaque(true);
 		textCrewmembersGoalLabel.setBackground(Color.BLACK);
 		textCrewmembersGoalLabel.setForeground(textColor);
@@ -492,12 +519,13 @@ public class GUI extends JFrame implements KeyListener {
 
 		// Botón para reiniciar la simulación
 		JButton restartButton = new JButton("REINICIAR SIMULACION");
-		restartButton.setFont(new Font("VCR OSD Mono", Font.BOLD, 14));
+		restartButton.setFont(new Font("VCR OSD Mono", Font.BOLD, (int) (12 * SCALE_X)));
 		restartButton.setBackground(Color.decode("0x8dffff"));
 		restartButton.setForeground(Color.BLACK);
 		restartButton.setFocusPainted(false);
 		restartButton.addActionListener(e -> restartSimulation(this.environmentStates, this.resultadoMeta));
-		restartButton.setBounds(575, 580, 200, 50);
+		restartButton.setBounds((int) (575 * SCALE_X), (int) (580 * SCALE_Y), (int) (200 * SCALE_X),
+				(int) (50 * SCALE_Y));
 		mapPanel.add(restartButton);
 
 		mapPanel.revalidate();
