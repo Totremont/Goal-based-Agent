@@ -39,3 +39,5 @@ Different search trees were implemented on multiple scenarios with interesting r
 The program was written in Java using the [FAIA Framework](https://jidis.frc.utn.edu.ar/papers/c5dca9488dfd645c135a16c9ccf4.pdf).
 
 A detail explanation of the agent model, implementation and game results can be found on `/Informe.pdf` (Spanish).
+
+This project was made as part of a course on Artificial Intelligence for my undergrad degree on [Ingeniería en Sistemas de Información](https://utn.edu.ar/es/federacion-universitaria-tecnologica/feria-de-carreras/sistemas-de-informacion) (Information Systems Engineering).
